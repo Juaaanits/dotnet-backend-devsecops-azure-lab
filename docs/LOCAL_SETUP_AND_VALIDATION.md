@@ -1,6 +1,6 @@
 # Local Setup and Validation Report
 
-Status: validated locally on 2026-09-05.
+Status: validated locally on 2026-09-05. First bug-fix validation also completed for authentication middleware, Services API creation, and Admin-only lookup mutations.
 
 This document records the backend setup and manual validation completed for the Sakenny backend clone. The goal was to prove the API can run locally with SQL Server, Swagger, JWT authentication, and local Azure Blob emulation before starting bug fixes and automation work.
 
@@ -109,7 +109,7 @@ The following backend flow was tested successfully:
 9. Converted a user from `User` to `Host`.
 10. Re-logged in as the host to get a fresh role-bearing JWT.
 11. Created property types.
-12. Worked around the service creation bug by inserting services directly in SQL Server.
+12. Initially worked around the service creation bug by inserting services directly in SQL Server.
 13. Created properties through `/AddProperty` using `multipart/form-data`.
 14. Verified image URLs persisted from Azurite.
 15. Verified property-service relationships in `PropertyServices`.
@@ -117,6 +117,8 @@ The following backend flow was tested successfully:
 17. Verified public property listing, details, and filtering.
 18. Verified host-owned property endpoints.
 19. Verified admin dashboard endpoints.
+20. Validated `POST /api/Services` after adding the missing `Icon` API contract.
+21. Validated Admin-only authorization for Type and Services mutation endpoints.
 
 ## Local Data Created During Validation
 
@@ -127,13 +129,17 @@ Id: 1
 Name: Apartment
 ```
 
-Sample services inserted manually because the current `POST /api/Services` endpoint has an open bug:
+Sample services used during validation:
 
 ```text
 Id: 5, Name: Wifi, Icon: wifi
 Id: 6, Name: Parking, Icon: parking
 Id: 7, Name: Air Conditioning, Icon: air-conditioning
+Id: 9, Name: Pool, Icon: pool
+Id: 10, Name: Sauna, Icon: sauna
 ```
+
+The first services were inserted manually while investigating the API issue. Later validation confirmed that the API can create services with both `Name` and `Icon`.
 
 Sample properties:
 
@@ -166,4 +172,4 @@ Property 2 -> Service 7
 - Azurite must be running because `BlobService` creates the blob container when the dependent service is constructed.
 - Swagger bearer authorization should receive the raw token only when Swagger already applies the `Bearer` scheme.
 - Host/admin role changes require a fresh login because the JWT contains role claims at token creation time.
-
+- Type and Services mutation endpoints now follow the expected authorization matrix: no token returns 401, Host token returns 403, and Admin token returns 200.

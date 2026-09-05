@@ -16,7 +16,7 @@ I wanted a project that was closer to real engineering work than a fresh CRUD ap
 
 My first goal was not to rewrite code. I focused on getting the backend running locally and proving the main workflows. I configured SQL Server, applied EF Core migrations, started Azurite for local blob storage, ran the API through Swagger, created users and roles, tested JWT authorization, created and approved properties, uploaded images, tested filtering, and validated the database tables directly.
 
-During that process I found practical issues: missing authentication middleware, a Services API contract mismatch, public mutation endpoints, hardcoded secrets, route inconsistencies, and infrastructure coupling caused by blob storage initialization. I documented each issue with impact, planned fix, and validation criteria so the project can evolve through controlled improvements.
+During that process I found practical issues: missing authentication middleware, a Services API contract mismatch, public mutation endpoints, hardcoded secrets, route inconsistencies, and infrastructure coupling caused by blob storage initialization. I fixed and validated the first authorization/API contract issues, then documented the remaining backlog with impact, planned fix, and validation criteria so the project can evolve through controlled improvements.
 
 The next phase is to add automated API and integration tests, build a CI pipeline with security scanning, containerize the backend, deploy it to Azure with Terraform, and measure SQL Server performance before and after database tuning.
 
@@ -37,6 +37,8 @@ Public property listing works
 Property filtering works
 Host-owned property endpoint works
 Admin dashboard endpoints work
+Services API creates Name + Icon through the API
+Type and Services mutation endpoints enforce 401/403/200 authorization behavior
 ```
 
 ## Defects Discovered Through Testing
@@ -50,6 +52,15 @@ Several routes use absolute paths, making the API less consistent
 Secrets and sensitive config should move out of appsettings.json
 EF Core warnings indicate model configuration cleanup is needed
 Nullable warnings indicate dashboard hardening is needed
+```
+
+## Fixes Validated So Far
+
+```text
+Added authentication middleware before authorization in the request pipeline
+Updated Services API contract so service creation includes Icon
+Protected Type and Services POST/PUT/DELETE endpoints with Admin authorization
+Validated no-token, Host-token, and Admin-token behavior with 401/403/200 responses
 ```
 
 ## Why This Project Fits My Target Roles
@@ -100,8 +111,6 @@ Measured before/after optimization plan
 ## Next Measurable Outcomes
 
 ```text
-Fix Services API and prove service creation through API instead of manual SQL
-Protect lookup mutation endpoints and prove 401/403/200 role behavior
 Add Postman collection and Newman CI run
 Add xUnit integration tests for auth and property flows
 Add Docker Compose for API dependencies
@@ -110,4 +119,3 @@ Create SQL Server performance baseline report
 Deploy to Azure with Terraform
 Add monitoring dashboard and alerting notes
 ```
-

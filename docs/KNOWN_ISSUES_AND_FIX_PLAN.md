@@ -7,8 +7,8 @@ This document records issues discovered during local validation. The intent is t
 | ID | Priority | Area | Status | Finding |
 | --- | --- | --- | --- | --- |
 | BUG-001 | High | Authentication | Fixed locally | JWT authorization required `app.UseAuthentication()` before `app.UseAuthorization()`. |
-| BUG-002 | High | Services API | Open | `POST /api/Services` fails because `Service.Icon` is required but `AddServiceDTO` does not accept `Icon`. |
-| BUG-003 | Medium | Authorization | Open | Type and Services management endpoints are public but should likely be admin-only. |
+| BUG-002 | High | Services API | Fixed locally | `POST /api/Services` failed because `Service.Icon` was required but `AddServiceDTO` did not accept `Icon`. |
+| BUG-003 | Medium | Authorization | Fixed locally | Type and Services mutation endpoints needed Admin-only authorization. |
 | BUG-004 | Medium | Storage | Open | `BlobService` connects to Azurite during service construction, affecting unrelated requests. |
 | BUG-005 | Medium | API Design | Open | Some routes are absolute and inconsistent with controller route prefixes. |
 | BUG-006 | High | Secrets | Open | JWT key and external service settings are stored in appsettings. |
@@ -95,6 +95,13 @@ GET /api/Services returns the new service.
 PropertyServices contains the expected relationship rows.
 ```
 
+Status:
+
+```text
+Fixed locally and validated through Swagger.
+Evidence: POST /api/Services created Service Id 10, Name Sauna, Icon sauna.
+```
+
 ## BUG-003: Lookup Management Endpoints Are Public
 
 Observed behavior:
@@ -123,6 +130,13 @@ Anonymous POST/PUT/DELETE returns 401.
 Host/User POST/PUT/DELETE returns 403.
 Admin POST/PUT/DELETE returns 200.
 GET remains accessible if public lookup reads are required.
+```
+
+Status:
+
+```text
+Fixed locally and validated through Swagger.
+Evidence: Type and Services mutation endpoints returned 401 with no token, 403 with Host token, and 200 with Admin token.
 ```
 
 ## BUG-004: BlobService Constructor Has External Side Effect
@@ -326,11 +340,9 @@ Dashboard endpoints return stable responses for empty and populated databases.
 Recommended implementation order:
 
 ```text
-1. BUG-002: Fix Services API so test data can be created through the API.
-2. BUG-003: Protect lookup mutation endpoints.
-3. BUG-004: Remove BlobService constructor side effect.
-4. BUG-006: Move secrets out of appsettings.
-5. BUG-005: Standardize route design.
-6. BUG-007/008/009: Clean EF and nullable warnings with tests.
+1. BUG-004: Remove BlobService constructor side effect.
+2. BUG-006: Move secrets out of appsettings.
+3. BUG-005: Standardize route design.
+4. BUG-007/008/009: Clean EF and nullable warnings with tests.
+5. Add regression tests for BUG-001, BUG-002, and BUG-003.
 ```
-

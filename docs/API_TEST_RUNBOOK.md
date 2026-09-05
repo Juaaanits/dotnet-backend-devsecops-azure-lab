@@ -196,7 +196,35 @@ SELECT * FROM PropertyTypes;
 
 ## 7. Create Services
 
-Current API bug: `POST /api/Services` accepts only `name`, but the database requires `Icon`. Until fixed, insert test services directly in SQL Server:
+`POST /api/Services` should accept both `name` and `icon`.
+
+Use admin token after the Admin-only endpoint protection is applied.
+
+```http
+POST /api/Services
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Sauna",
+  "icon": "sauna"
+}
+```
+
+Expected:
+
+```text
+200 OK
+```
+
+SQL check:
+
+```sql
+SELECT * FROM Services;
+```
+
+Earlier investigation used this temporary SQL workaround before the API contract was fixed:
 
 ```sql
 INSERT INTO Services (Name, Icon, IsDeleted)
@@ -204,12 +232,6 @@ VALUES
 ('Wifi', 'wifi', 0),
 ('Parking', 'parking', 0),
 ('Air Conditioning', 'air-conditioning', 0);
-```
-
-SQL check:
-
-```sql
-SELECT * FROM Services;
 ```
 
 ## 8. Add Property
@@ -376,6 +398,28 @@ GET /api/Dashboard/topproperties
 GET /api/Dashboard/recenttransactions
 ```
 
+## 15. Authorization Regression Matrix
+
+These checks validate that lookup reads stay public while mutations require Admin.
+
+Services:
+
+```text
+No token   + GET  /api/Services -> 200
+No token   + POST /api/Services -> 401
+Host token + POST /api/Services -> 403
+Admin token + POST /api/Services -> 200
+```
+
+Types:
+
+```text
+No token   + GET  /api/Type -> 200
+No token   + POST /api/Type -> 401
+Host token + POST /api/Type -> 403
+Admin token + POST /api/Type -> 200
+```
+
 ## Routes To Watch
 
 Some routes are absolute routes and are not under their controller prefix:
@@ -392,4 +436,3 @@ Some routes are absolute routes and are not under their controller prefix:
 ```
 
 This is an improvement candidate because route consistency matters for maintainability and API consumer experience.
-

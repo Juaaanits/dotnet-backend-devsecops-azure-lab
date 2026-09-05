@@ -6,7 +6,7 @@ The original Sakenny backend is a .NET 8 property rental API with SQL Server, AS
 
 ## Project Status
 
-Current phase: local backend validation completed.
+Current phase: local backend validation and first bug-fix validation completed.
 
 Validated on 2026-09-05:
 
@@ -25,6 +25,8 @@ Property-service relationship works
 Public property listing/filter/detail works
 Host-owned property endpoints work
 Admin dashboard endpoints work
+Services API creates Name + Icon through the API
+Type and Services mutation endpoints enforce Admin-only access
 ```
 
 ## My Engineering Focus
@@ -150,7 +152,7 @@ Register admin
 Login admin
 Convert user to Host
 Create property type
-Create services through SQL workaround
+Create services through API after fixing the Icon contract
 Create property as Host
 Upload images to Azurite
 Approve property as Admin
@@ -174,9 +176,9 @@ Property 2 -> Service 7
 The first testing pass found real improvement opportunities:
 
 ```text
-Authentication middleware ordering needed app.UseAuthentication()
-POST /api/Services fails because Icon is required but missing from AddServiceDTO
-Type and Services mutation endpoints should be protected as Admin-only
+Authentication middleware ordering needed app.UseAuthentication() - fixed and validated
+POST /api/Services failed because Icon was required but missing from AddServiceDTO - fixed and validated
+Type and Services mutation endpoints needed Admin-only protection - fixed and validated
 BlobService connects to Azurite during service construction
 Some routes use absolute paths and are inconsistent
 Secrets should move out of appsettings.json
@@ -191,16 +193,15 @@ Full issue details are tracked in [docs/KNOWN_ISSUES_AND_FIX_PLAN.md](docs/KNOWN
 Next engineering milestones:
 
 ```text
-1. Fix service creation so services can be created through the API.
-2. Add admin authorization to lookup mutation endpoints.
-3. Decouple blob storage initialization from unrelated requests.
-4. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.
-5. Create a Postman collection for the validated API flow.
-6. Add automated integration tests.
-7. Add Docker Compose for SQL Server and Azurite dependencies.
-8. Add GitHub Actions build, test, and security gates.
-9. Create a SQL Server performance baseline.
-10. Deploy to Azure with Terraform and add monitoring.
+1. Decouple blob storage initialization from unrelated requests.
+2. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.
+3. Create a Postman collection for the validated API flow.
+4. Add automated integration tests.
+5. Add Docker Compose for SQL Server and Azurite dependencies.
+6. Add GitHub Actions build, test, and security gates.
+7. Create a SQL Server performance baseline.
+8. Prevent duplicate lookup values where the domain requires uniqueness.
+9. Deploy to Azure with Terraform and add monitoring.
 ```
 
 The full roadmap is in [docs/QA_DEVSECOPS_CLOUD_ROADMAP.md](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md).
