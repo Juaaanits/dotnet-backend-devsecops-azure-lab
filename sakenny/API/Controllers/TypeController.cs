@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using sakenny.Application.DTO;
 using sakenny.Application.Interfaces;
@@ -23,6 +24,7 @@ namespace sakenny.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AddTypeDTO dto)
         {
@@ -33,6 +35,7 @@ namespace sakenny.API.Controllers
             return Ok(new { message = "Property type added successfully" });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UpdateTypeDTO dto)
         {
@@ -50,6 +53,7 @@ namespace sakenny.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

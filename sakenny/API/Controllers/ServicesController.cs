@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Authorization;
 using sakenny.Application.DTO;
 using sakenny.Application.Services;
 
@@ -24,6 +25,7 @@ namespace sakenny.Controllers
             return Ok(services);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AddServiceDTO dto)
         {
@@ -42,6 +44,7 @@ namespace sakenny.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UpdateServiceDTO dto)
         {
@@ -59,6 +62,7 @@ namespace sakenny.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
