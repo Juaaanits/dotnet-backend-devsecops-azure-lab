@@ -57,8 +57,10 @@ The project documentation is organized as evidence of the validation and improve
 | [API Test Runbook](docs/API_TEST_RUNBOOK.md) | Manual Swagger/Postman workflow that can become an automated test suite. |
 | [SQL Server Test Notes](docs/SQL_SERVER_TEST_NOTES.md) | Database checks, validation queries, and future performance baseline plan. |
 | [Known Issues and Fix Plan](docs/KNOWN_ISSUES_AND_FIX_PLAN.md) | Bugs and improvement items found during testing, with fix and validation criteria. |
+| [One-Hour DevOps and DevSecOps Plan](docs/ONE_HOUR_DEVOPS_DEVSECOPS_PLAN.md) | Short, focused plan for adding a CI quality gate and dependency monitoring. |
 | [QA, DevSecOps, and Cloud Roadmap](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md) | Roadmap for automated QA, security gates, CI/CD, SQL tuning, Terraform, and Azure. |
 | [Portfolio Case Study Draft](docs/PORTFOLIO_CASE_STUDY_DRAFT.md) | Recruiter/interview-facing summary of the project direction and evidence. |
+| [Reference Links](docs/REFERENCE_LINKS.md) | Categorized official references for .NET, QA, DevSecOps, CI/CD, Docker, Azure, Terraform, SQL Server, k6, and AWS cloud concepts. |
 
 ## Tech Stack
 
@@ -193,15 +195,16 @@ Full issue details are tracked in [docs/KNOWN_ISSUES_AND_FIX_PLAN.md](docs/KNOWN
 Next engineering milestones:
 
 ```text
-1. Decouple blob storage initialization from unrelated requests.
-2. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.
-3. Create a Postman collection for the validated API flow.
-4. Add automated integration tests.
-5. Add Docker Compose for SQL Server and Azurite dependencies.
-6. Add GitHub Actions build, test, and security gates.
-7. Create a SQL Server performance baseline.
-8. Prevent duplicate lookup values where the domain requires uniqueness.
-9. Deploy to Azure with Terraform and add monitoring.
+1. Add GitHub Actions build quality gate and Dependabot dependency monitoring.
+2. Decouple blob storage initialization from unrelated requests.
+3. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.
+4. Create a Postman collection for the validated API flow.
+5. Add automated integration tests.
+6. Add Docker Compose for SQL Server and Azurite dependencies.
+7. Add CodeQL, secret scanning, and container scanning.
+8. Create a SQL Server performance baseline.
+9. Prevent duplicate lookup values where the domain requires uniqueness.
+10. Deploy to Azure with Terraform and add monitoring.
 ```
 
 The full roadmap is in [docs/QA_DEVSECOPS_CLOUD_ROADMAP.md](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md).
