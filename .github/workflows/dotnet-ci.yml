@@ -1,0 +1,35 @@
+name: .NET CI
+
+on:
+  push:
+    branches:
+      - main
+      - "devops/**"
+      - "fix/**"
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Restore and build backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore ./sakenny.sln
+
+      - name: Build
+        run: dotnet build ./sakenny.sln --configuration Release --no-restore
