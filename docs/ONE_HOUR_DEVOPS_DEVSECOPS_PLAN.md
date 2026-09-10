@@ -1,4 +1,4 @@
-<!--# One-Hour DevOps and DevSecOps Plan -->
+# One-Hour DevOps and DevSecOps Plan
 
 Use this when time is limited and the goal is to add visible DevOps/DevSecOps value without changing application behavior.
 
@@ -265,6 +265,43 @@ Dependabot configuration is recognized.
 Future NuGet and GitHub Actions dependency update PRs can be created.
 ```
 
+## Evidence Captured
+
+Observed after the CI and Dependabot setup was merged into `main`:
+
+```text
+.NET CI workflow passed.
+Dependabot created automated GitHub Actions update PRs.
+Dependabot created automated NuGet update PRs.
+Each listed PR showed 2/2 passing checks before review.
+```
+
+Automated GitHub Actions update PRs observed:
+
+```text
+ci: bump actions/checkout from 6 to 7
+ci: bump actions/setup-dotnet from 5 to 6
+```
+
+Automated NuGet update PRs observed:
+
+```text
+deps: Bump AutoMapper from 15.0.1 to 16.2.0
+deps: Bump Azure.Data.Tables from 12.9.1 to 12.12.0
+deps: Bump Azure.Storage.Blobs from 12.22.2 to 12.29.2
+deps: Bump Azure.Storage.Files.Shares from 12.20.1 to 12.27.1
+deps: Bump Azure.Storage.Queues from 12.20.1 to 12.27.1
+```
+
+Review guidance:
+
+```text
+Merge GitHub Actions updates first after CI passes.
+Merge Azure SDK patch/minor updates one at a time after CI passes.
+Treat the AutoMapper major version update as higher risk.
+After the AutoMapper update, run local Swagger smoke tests for login, property creation, property filtering, and dashboard access.
+```
+
 ## If The Build Fails
 
 Do not panic. A failing CI run is still useful engineering evidence.
@@ -287,6 +324,12 @@ Use this wording after the workflow passes:
 
 ```text
 Added the first DevSecOps quality gate using GitHub Actions. The pipeline restores and builds the .NET 8 backend on every push and pull request, while Dependabot monitors NuGet and GitHub Actions dependencies for safer maintenance.
+```
+
+Use this wording after Dependabot PRs appear:
+
+```text
+Validated dependency monitoring by confirming Dependabot opened automated update pull requests for GitHub Actions and NuGet packages, with CI checks passing before merge review.
 ```
 
 ## Next Session
