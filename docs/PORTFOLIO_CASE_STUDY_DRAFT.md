@@ -8,7 +8,7 @@ Sakenny Backend QA, DevSecOps, and Cloud Engineering Lab
 
 ## Short Resume Version
 
-Validated and extended an MIT-licensed ASP.NET Core property rental backend as an Automation QA, DevSecOps, and Cloud Engineering portfolio project. Reproduced the local environment with SQL Server and Azurite, verified JWT role-based workflows through Swagger, documented API test paths, identified backend defects, and created a roadmap for automated testing, CI security gates, SQL Server performance tuning, Docker, Terraform, and Azure deployment.
+Validated and extended an MIT-licensed ASP.NET Core property rental backend as an Automation QA, DevSecOps, and Cloud Engineering portfolio project. Reproduced the local environment with SQL Server and Azurite, verified JWT role-based workflows through Swagger, documented API test paths, identified backend defects, added an initial GitHub Actions build quality gate, enabled Dependabot dependency monitoring, and created a roadmap for automated testing, security scanning, SQL Server performance tuning, Docker, Terraform, and Azure deployment.
 
 ## Interview Explanation
 
@@ -18,7 +18,7 @@ My first goal was not to rewrite code. I focused on getting the backend running 
 
 During that process I found practical issues: missing authentication middleware, a Services API contract mismatch, public mutation endpoints, hardcoded secrets, route inconsistencies, and infrastructure coupling caused by blob storage initialization. I fixed and validated the first authorization/API contract issues, then documented the remaining backlog with impact, planned fix, and validation criteria so the project can evolve through controlled improvements.
 
-The next phase is to add automated API and integration tests, build a CI pipeline with security scanning, containerize the backend, deploy it to Azure with Terraform, and measure SQL Server performance before and after database tuning.
+The next phase is to extend the CI pipeline with automated API tests, CodeQL, secret scanning, and container scanning, then containerize the backend, deploy it to Azure with Terraform, and measure SQL Server performance before and after database tuning.
 
 ## What I Have Proven So Far
 
@@ -39,6 +39,8 @@ Host-owned property endpoint works
 Admin dashboard endpoints work
 Services API creates Name + Icon through the API
 Type and Services mutation endpoints enforce 401/403/200 authorization behavior
+GitHub Actions restore/build workflow passes
+Dependabot creates dependency update PRs for GitHub Actions and NuGet packages
 ```
 
 ## Defects Discovered Through Testing
@@ -61,6 +63,33 @@ Added authentication middleware before authorization in the request pipeline
 Updated Services API contract so service creation includes Icon
 Protected Type and Services POST/PUT/DELETE endpoints with Admin authorization
 Validated no-token, Host-token, and Admin-token behavior with 401/403/200 responses
+Added GitHub Actions .NET restore/build validation
+Enabled Dependabot monitoring for NuGet and GitHub Actions dependencies
+```
+
+## CI And Dependency Monitoring Evidence
+
+```text
+.NET CI workflow passed after the CI branch was merged.
+Dependabot opened automated PRs for actions/checkout and actions/setup-dotnet.
+Dependabot opened automated PRs for AutoMapper and Azure SDK NuGet packages.
+The Dependabot PR list showed 2/2 checks passing before merge review.
+The initial Dependabot PR queue was later cleared to 0 open pull requests.
+```
+
+Evidence screenshot:
+
+```text
+docs/evidence/github-pr-queue-cleared.png
+```
+
+Review note:
+
+```text
+GitHub Actions version bumps are low-risk when CI passes.
+Azure SDK patch/minor updates should be merged one at a time after CI passes.
+AutoMapper 15.0.1 to 16.2.0 is a major version update and should be followed by local API smoke testing.
+Post-merge audit found a duplicate Azure.Storage.Blobs package reference that should be cleaned before the next DevSecOps stage.
 ```
 
 ## Why This Project Fits My Target Roles
@@ -83,6 +112,7 @@ Secret management
 Role-based access validation
 SAST/dependency/container scanning roadmap
 CI/CD quality gates
+Dependabot dependency monitoring
 Security hardening backlog
 OWASP-style validation plan
 ```
@@ -111,10 +141,11 @@ Measured before/after optimization plan
 ## Next Measurable Outcomes
 
 ```text
+Clean duplicate Azure.Storage.Blobs package reference from the merged dependency updates
 Add Postman collection and Newman CI run
 Add xUnit integration tests for auth and property flows
 Add Docker Compose for API dependencies
-Add GitHub Actions CI with build, tests, and security scans
+Extend GitHub Actions CI with tests and security scans
 Create SQL Server performance baseline report
 Deploy to Azure with Terraform
 Add monitoring dashboard and alerting notes

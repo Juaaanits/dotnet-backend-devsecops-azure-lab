@@ -160,6 +160,37 @@ Explanation of why an advanced option was rejected if it did not fit the data
 
 ## Phase 5: DevSecOps Pipeline
 
+Current baseline implemented:
+
+```text
+GitHub Actions restore/build quality gate
+Dependabot monitoring for NuGet dependencies
+Dependabot monitoring for GitHub Actions versions
+```
+
+Evidence collected:
+
+```text
+.NET CI workflow passed.
+Dependabot opened update PRs for GitHub Actions and NuGet packages.
+Dependabot PRs showed 2/2 passing checks before review.
+The first Dependabot PR queue was later cleared to 0 open pull requests.
+```
+
+Evidence screenshot:
+
+```text
+docs/evidence/github-pr-queue-cleared.png
+```
+
+Post-merge cleanup item:
+
+```text
+Remove the duplicate Azure.Storage.Blobs package reference left after dependency conflict resolution.
+Keep the updated Azure.Storage.Blobs 12.29.2 version.
+Validate with dotnet restore, dotnet build, and a short Swagger smoke test.
+```
+
 Target pipeline:
 
 ```text
@@ -195,6 +226,7 @@ Azure Container Registry
 Security improvements:
 
 ```text
+Clean duplicate dependency references after automated update conflict resolution
 Move secrets to user-secrets locally
 Use environment variables in CI
 Use Azure Key Vault in Azure
@@ -292,9 +324,11 @@ README with honest project scope and attribution
 Local setup report
 API test runbook
 Known issues and fix plan
+DevOps and DevSecOps checklist
 Postman collection
 Automated test results
-CI/CD pipeline screenshot
+CI/CD pipeline screenshot with green .NET CI run
+Dependabot PR screenshot showing automated dependency updates and passing checks
 SQL performance report
 Security scan report
 Docker Compose setup
@@ -313,9 +347,8 @@ Problem:
 The cloned backend had no documented local validation process, incomplete API test coverage, secrets/configuration risks, and several runtime/API issues.
 
 Action:
-I established a reproducible SQL Server + Azurite local environment, validated critical role-based API workflows, fixed discovered issues, added automated tests, introduced CI security gates, and prepared Azure deployment infrastructure.
+I established a reproducible SQL Server + Azurite local environment, validated critical role-based API workflows, fixed discovered issues, introduced an initial CI build gate, enabled dependency monitoring, and prepared the backlog for automated tests, security scanning, and Azure deployment infrastructure.
 
 Result:
 The backend moved from manually tested clone to documented, testable, cloud-ready engineering project with measurable quality and security improvements.
 ```
-
