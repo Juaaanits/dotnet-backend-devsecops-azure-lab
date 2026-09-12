@@ -74,6 +74,13 @@ Enabled Dependabot monitoring for NuGet and GitHub Actions dependencies
 Dependabot opened automated PRs for actions/checkout and actions/setup-dotnet.
 Dependabot opened automated PRs for AutoMapper and Azure SDK NuGet packages.
 The Dependabot PR list showed 2/2 checks passing before merge review.
+The initial Dependabot PR queue was later cleared to 0 open pull requests.
+```
+
+Evidence screenshot:
+
+```text
+docs/evidence/github-pr-queue-cleared.png
 ```
 
 Review note:
@@ -82,6 +89,7 @@ Review note:
 GitHub Actions version bumps are low-risk when CI passes.
 Azure SDK patch/minor updates should be merged one at a time after CI passes.
 AutoMapper 15.0.1 to 16.2.0 is a major version update and should be followed by local API smoke testing.
+Post-merge audit found a duplicate Azure.Storage.Blobs package reference that should be cleaned before the next DevSecOps stage.
 ```
 
 ## Why This Project Fits My Target Roles
@@ -133,6 +141,7 @@ Measured before/after optimization plan
 ## Next Measurable Outcomes
 
 ```text
+Clean duplicate Azure.Storage.Blobs package reference from the merged dependency updates
 Add Postman collection and Newman CI run
 Add xUnit integration tests for auth and property flows
 Add Docker Compose for API dependencies

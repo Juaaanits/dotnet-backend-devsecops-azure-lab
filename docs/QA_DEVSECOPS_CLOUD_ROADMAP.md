@@ -174,6 +174,21 @@ Evidence collected:
 .NET CI workflow passed.
 Dependabot opened update PRs for GitHub Actions and NuGet packages.
 Dependabot PRs showed 2/2 passing checks before review.
+The first Dependabot PR queue was later cleared to 0 open pull requests.
+```
+
+Evidence screenshot:
+
+```text
+docs/evidence/github-pr-queue-cleared.png
+```
+
+Post-merge cleanup item:
+
+```text
+Remove the duplicate Azure.Storage.Blobs package reference left after dependency conflict resolution.
+Keep the updated Azure.Storage.Blobs 12.29.2 version.
+Validate with dotnet restore, dotnet build, and a short Swagger smoke test.
 ```
 
 Target pipeline:
@@ -211,6 +226,7 @@ Azure Container Registry
 Security improvements:
 
 ```text
+Clean duplicate dependency references after automated update conflict resolution
 Move secrets to user-secrets locally
 Use environment variables in CI
 Use Azure Key Vault in Azure
@@ -308,6 +324,7 @@ README with honest project scope and attribution
 Local setup report
 API test runbook
 Known issues and fix plan
+DevOps and DevSecOps checklist
 Postman collection
 Automated test results
 CI/CD pipeline screenshot with green .NET CI run

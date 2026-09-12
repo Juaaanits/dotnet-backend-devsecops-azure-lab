@@ -1,0 +1,154 @@
+# DevOps and DevSecOps Checklist
+
+This checklist tracks the permanent DevOps and DevSecOps work for the Sakenny backend lab. It replaces the temporary one-hour plan and keeps the completed evidence, review notes, and next actions in one place.
+
+## Current Baseline
+
+Completed:
+
+```text
+GitHub Actions .NET restore/build workflow added.
+Workflow runs on push and pull request.
+Workflow uses least-privilege contents: read permission.
+Dependabot monitors GitHub Actions dependencies.
+Dependabot monitors NuGet dependencies under /sakenny.
+Initial Dependabot PR queue was processed until 0 open pull requests remained.
+```
+
+Evidence:
+
+```text
+.NET CI workflow passed.
+Dependabot opened GitHub Actions update PRs.
+Dependabot opened NuGet update PRs.
+Dependabot PRs showed 2/2 passing checks before review.
+GitHub pull request queue was cleared to 0 open PRs.
+```
+
+Screenshot evidence:
+
+```text
+docs/evidence/github-pr-queue-cleared.png
+```
+
+## Implemented Files
+
+```text
+.github/workflows/dotnet-ci.yml
+.github/dependabot.yml
+docs/REFERENCE_LINKS.md
+```
+
+## Current CI Gate
+
+The first CI gate is intentionally small:
+
+```text
+Restore NuGet dependencies.
+Build the .NET 8 solution in Release mode.
+Fail the PR if restore/build fails.
+```
+
+Why this was the correct first gate:
+
+```text
+It is visible on GitHub.
+It does not require Azure resources.
+It does not require SQL Server or Azurite in CI yet.
+It proves build automation.
+It creates a base for future test, SAST, secret scan, and container scan stages.
+```
+
+## Dependabot Review Process
+
+Review order:
+
+```text
+1. GitHub Actions version bumps.
+2. Azure SDK patch/minor NuGet updates.
+3. Major package updates last.
+```
+
+Review rules:
+
+```text
+Only merge one dependency PR at a time.
+Wait for CI to pass before merging.
+Treat major version updates as higher risk.
+Run local Swagger smoke tests after high-risk package updates.
+Watch for package conflict resolution mistakes.
+```
+
+## Post-Merge Audit Finding
+
+Finding:
+
+```text
+origin/main contains duplicate Azure.Storage.Blobs PackageReference entries after Dependabot conflict resolution.
+```
+
+Correct target state:
+
+```xml
+<PackageReference Include="Azure.Storage.Blobs" Version="12.29.2" />
+```
+
+Cleanup:
+
+```text
+Remove the older Azure.Storage.Blobs 12.22.2 entry.
+Keep only Azure.Storage.Blobs 12.29.2.
+Validate with dotnet restore and dotnet build.
+Run a short local Swagger smoke test for image upload/property creation paths.
+```
+
+## Next DevSecOps Checklist
+
+Immediate:
+
+```text
+Fix duplicate Azure.Storage.Blobs package reference.
+Add CodeQL SAST scanning.
+Document CodeQL findings or clean run.
+```
+
+Next:
+
+```text
+Add Gitleaks secret scanning.
+Create a Postman smoke collection.
+Run Postman collection with Newman locally.
+Add Newman to GitHub Actions after the collection is stable.
+```
+
+Later:
+
+```text
+Add Docker Compose for SQL Server and Azurite.
+Add integration tests with WebApplicationFactory.
+Add Trivy scan after Docker/container work exists.
+Add OWASP ZAP baseline scan after a deployed/stable local target exists.
+Prepare Azure deployment with Terraform.
+Move production secrets to Azure Key Vault.
+```
+
+## Resume Summary
+
+Use this in a portfolio, interview, or LinkedIn project post:
+
+```text
+Added a GitHub Actions CI quality gate for the .NET 8 backend and enabled Dependabot monitoring for GitHub Actions and NuGet dependencies. Reviewed the first dependency update queue through passing CI checks, cleared all open Dependabot PRs, and documented a post-merge dependency configuration cleanup item.
+```
+
+## Branch Cleanup Checklist
+
+After related PRs are merged:
+
+```bash
+git switch main
+git pull
+git branch -d docs/record-dependabot-evidence
+git fetch --prune
+```
+
+If Git says a local branch is not fully merged, do not force-delete it until the matching GitHub PR is confirmed merged.

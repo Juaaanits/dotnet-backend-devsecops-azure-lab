@@ -36,6 +36,13 @@ GitHub Actions .NET restore/build workflow passed
 Dependabot created automated update PRs for GitHub Actions
 Dependabot created automated update PRs for NuGet packages
 Dependabot PRs showed 2/2 passing checks before review
+Initial Dependabot PR queue was cleared to 0 open pull requests
+```
+
+Evidence screenshot:
+
+```text
+docs/evidence/github-pr-queue-cleared.png
 ```
 
 ## My Engineering Focus
@@ -66,7 +73,7 @@ The project documentation is organized as evidence of the validation and improve
 | [API Test Runbook](docs/API_TEST_RUNBOOK.md) | Manual Swagger/Postman workflow that can become an automated test suite. |
 | [SQL Server Test Notes](docs/SQL_SERVER_TEST_NOTES.md) | Database checks, validation queries, and future performance baseline plan. |
 | [Known Issues and Fix Plan](docs/KNOWN_ISSUES_AND_FIX_PLAN.md) | Bugs and improvement items found during testing, with fix and validation criteria. |
-| [One-Hour DevOps and DevSecOps Plan](docs/ONE_HOUR_DEVOPS_DEVSECOPS_PLAN.md) | Short, focused plan for adding a CI quality gate and dependency monitoring. |
+| [DevOps and DevSecOps Checklist](docs/DEVOPS_DEVSECOPS_CHECKLIST.md) | Permanent checklist for CI, Dependabot, security gates, evidence, and next DevSecOps tasks. |
 | [QA, DevSecOps, and Cloud Roadmap](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md) | Roadmap for automated QA, security gates, CI/CD, SQL tuning, Terraform, and Azure. |
 | [Portfolio Case Study Draft](docs/PORTFOLIO_CASE_STUDY_DRAFT.md) | Recruiter/interview-facing summary of the project direction and evidence. |
 | [Reference Links](docs/REFERENCE_LINKS.md) | Categorized official references for .NET, QA, DevSecOps, CI/CD, Docker, Azure, Terraform, SQL Server, k6, and AWS cloud concepts. |
@@ -196,6 +203,7 @@ Some routes use absolute paths and are inconsistent
 Secrets should move out of appsettings.json
 EF model warnings need cleanup
 Dashboard nullable warnings need cleanup; CI passes but reports nullable warnings
+Duplicate Azure.Storage.Blobs package reference needs cleanup after Dependabot conflict resolution
 ```
 
 Full issue details are tracked in [docs/KNOWN_ISSUES_AND_FIX_PLAN.md](docs/KNOWN_ISSUES_AND_FIX_PLAN.md).
@@ -205,7 +213,7 @@ Full issue details are tracked in [docs/KNOWN_ISSUES_AND_FIX_PLAN.md](docs/KNOWN
 Next engineering milestones:
 
 ```text
-1. Review and merge safe Dependabot PRs after CI passes.
+1. Remove duplicate Azure.Storage.Blobs package reference from the merged dependency updates.
 2. Add CodeQL SAST scanning.
 3. Decouple blob storage initialization from unrelated requests.
 4. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.

@@ -15,6 +15,7 @@ This document records issues discovered during local validation. The intent is t
 | BUG-007 | Low | EF Model | Open | EF logs warnings about required relationships with global query filters. |
 | BUG-008 | Low | EF Model | Open | EF logs warnings about decimal precision on `PropertySnapshot`. |
 | BUG-009 | Low | Code Quality | Open | Build warnings show possible null dereferences in dashboard logic. |
+| BUG-010 | Medium | Dependency Config | Open | `origin/main` contains duplicate `Azure.Storage.Blobs` package references after Dependabot conflict resolution. |
 
 ## BUG-001: Missing Authentication Middleware
 
@@ -335,14 +336,55 @@ Build warnings reduced.
 Dashboard endpoints return stable responses for empty and populated databases.
 ```
 
+## BUG-010: Duplicate Azure.Storage.Blobs Package Reference
+
+Observed behavior:
+
+```text
+After merging Dependabot PRs, origin/main contains two Azure.Storage.Blobs PackageReference entries:
+Azure.Storage.Blobs 12.22.2
+Azure.Storage.Blobs 12.29.2
+```
+
+Likely cause:
+
+```text
+A Dependabot conflict was resolved by keeping both the old and updated Azure.Storage.Blobs package lines.
+```
+
+Risk:
+
+```text
+Duplicate package references make dependency state unclear and can create restore/build warnings.
+The project should keep only one intended package version.
+```
+
+Proposed fix:
+
+```text
+Remove the older Azure.Storage.Blobs 12.22.2 reference.
+Keep Azure.Storage.Blobs 12.29.2.
+Run restore/build after the cleanup.
+```
+
+Validation:
+
+```text
+sakenny.csproj contains only one Azure.Storage.Blobs PackageReference.
+dotnet restore passes.
+dotnet build passes.
+Swagger smoke tests still pass for login, property creation, property filtering, and image upload paths.
+```
+
 ## Execution Order
 
 Recommended implementation order:
 
 ```text
-1. BUG-004: Remove BlobService constructor side effect.
-2. BUG-006: Move secrets out of appsettings.
-3. BUG-005: Standardize route design.
-4. BUG-007/008/009: Clean EF and nullable warnings with tests.
-5. Add regression tests for BUG-001, BUG-002, and BUG-003.
+1. BUG-010: Remove duplicate Azure.Storage.Blobs package reference.
+2. BUG-004: Remove BlobService constructor side effect.
+3. BUG-006: Move secrets out of appsettings.
+4. BUG-005: Standardize route design.
+5. BUG-007/008/009: Clean EF and nullable warnings with tests.
+6. Add regression tests for BUG-001, BUG-002, and BUG-003.
 ```
