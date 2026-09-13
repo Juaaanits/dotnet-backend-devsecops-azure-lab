@@ -8,6 +8,7 @@ This document captures the SQL Server checks used during backend validation and 
 Server: .\SQLEXPRESS
 Database: SakennyDB
 Authentication: Windows integrated security
+Monitoring login: grafana_reader
 ```
 
 ## Core Tables Observed
@@ -97,9 +98,9 @@ FROM Properties
 ORDER BY Id;
 ```
 
-## Manual Seed Used During Validation
+## Manual Seed Used During Early Validation
 
-The `Services` API currently has an issue because the table requires `Icon`, but the create DTO only accepts `Name`. This SQL was used as a temporary test-data workaround:
+The first validation pass found that the `Services` API could not create rows because the table required `Icon`, but the create DTO only accepted `Name`. This SQL was used as a temporary test-data workaround before the API contract was fixed:
 
 ```sql
 INSERT INTO Services (Name, Icon, IsDeleted)
@@ -107,6 +108,32 @@ VALUES
 ('Wifi', 'wifi', 0),
 ('Parking', 'parking', 0),
 ('Air Conditioning', 'air-conditioning', 0);
+```
+
+Current state:
+
+```text
+POST /api/Services now accepts name and icon.
+Admin authorization is required for Services and Type mutations.
+The SQL seed remains useful only for quick local setup or emergency test-data repair.
+```
+
+## Grafana Monitoring Validation
+
+The local SQL Server observability setup is documented in:
+
+```text
+docs/OBSERVABILITY_SQL_SERVER_GRAFANA.md
+```
+
+Validated monitoring behavior:
+
+```text
+Grafana connects to SQL Server through host.docker.internal:1433.
+Dashboard queries read SakennyDB metadata, sessions, waits, log space, table sizes, indexes, and security counters.
+grafana_reader uses read-only/scoped monitoring permissions.
+msdb job history panels required object-level SELECT grants.
+Some SQL Server Express panels show No data because the local database has no SQL Agent workload or backup history yet.
 ```
 
 ## Performance Baseline Plan
@@ -197,4 +224,3 @@ INCLUDE (Rate);
 ```
 
 Only apply indexes after measuring the baseline and confirming the query patterns.
-

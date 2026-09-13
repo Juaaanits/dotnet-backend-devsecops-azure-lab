@@ -6,7 +6,7 @@ The original Sakenny backend is a .NET 8 property rental API with SQL Server, AS
 
 ## Project Status
 
-Current phase: local backend validation, first bug-fix validation, and first CI/dependency monitoring gate completed.
+Current phase: local backend validation, first bug-fix validation, CI/dependency monitoring, CodeQL SAST, and local SQL Server observability completed.
 
 Validated on 2026-09-05:
 
@@ -29,6 +29,16 @@ Services API creates Name + Icon through the API
 Type and Services mutation endpoints enforce Admin-only access
 ```
 
+Observability validated on 2026-09-13:
+
+```text
+Grafana runs locally through Docker Compose
+Grafana connects to SQL Server through host.docker.internal:1433
+SakennyDB dashboard loads SQL Server operational panels
+grafana_reader uses scoped monitoring permissions instead of sysadmin
+Dashboard evidence screenshots are stored under docs/evidence
+```
+
 CI and dependency monitoring evidence:
 
 ```text
@@ -37,12 +47,17 @@ Dependabot created automated update PRs for GitHub Actions
 Dependabot created automated update PRs for NuGet packages
 Dependabot PRs showed 2/2 passing checks before review
 Initial Dependabot PR queue was cleared to 0 open pull requests
+CodeQL C# scanning was added and merged after repository code scanning was enabled
+SQL Server monitoring dashboard runs locally through Grafana and Docker
 ```
 
 Evidence screenshot:
 
 ```text
 docs/evidence/github-pr-queue-cleared.png
+docs/evidence/grafana-sql-dashboard-overview.png
+docs/evidence/grafana-sql-dashboard-security-monitoring.png
+docs/evidence/grafana-sql-dashboard-index-health.png
 ```
 
 ## My Engineering Focus
@@ -74,6 +89,7 @@ The project documentation is organized as evidence of the validation and improve
 | [SQL Server Test Notes](docs/SQL_SERVER_TEST_NOTES.md) | Database checks, validation queries, and future performance baseline plan. |
 | [Known Issues and Fix Plan](docs/KNOWN_ISSUES_AND_FIX_PLAN.md) | Bugs and improvement items found during testing, with fix and validation criteria. |
 | [DevOps and DevSecOps Checklist](docs/DEVOPS_DEVSECOPS_CHECKLIST.md) | Permanent checklist for CI, Dependabot, security gates, evidence, and next DevSecOps tasks. |
+| [SQL Server Observability With Grafana](docs/OBSERVABILITY_SQL_SERVER_GRAFANA.md) | Local Grafana + SQL Server monitoring setup, permissions, dashboard evidence, and troubleshooting notes. |
 | [QA, DevSecOps, and Cloud Roadmap](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md) | Roadmap for automated QA, security gates, CI/CD, SQL tuning, Terraform, and Azure. |
 | [Portfolio Case Study Draft](docs/PORTFOLIO_CASE_STUDY_DRAFT.md) | Recruiter/interview-facing summary of the project direction and evidence. |
 | [Reference Links](docs/REFERENCE_LINKS.md) | Categorized official references for .NET, QA, DevSecOps, CI/CD, Docker, Azure, Terraform, SQL Server, k6, and AWS cloud concepts. |
@@ -106,6 +122,8 @@ xUnit integration testing plan
 Docker/Docker Compose plan
 GitHub Actions CI build gate
 Dependabot dependency monitoring
+CodeQL SAST scanning
+Grafana SQL Server observability dashboard
 SAST/secret/container scanning plan
 Terraform and Azure deployment plan
 SQL Server performance baseline plan
@@ -198,12 +216,14 @@ The first testing pass found real improvement opportunities:
 Authentication middleware ordering needed app.UseAuthentication() - fixed and validated
 POST /api/Services failed because Icon was required but missing from AddServiceDTO - fixed and validated
 Type and Services mutation endpoints needed Admin-only protection - fixed and validated
+Duplicate Azure.Storage.Blobs package reference was cleaned after Dependabot conflict resolution
+CodeQL C# scanning was added after enabling GitHub code scanning
+Grafana SQL Server monitoring was added with a dedicated read-only database login
 BlobService connects to Azurite during service construction
 Some routes use absolute paths and are inconsistent
 Secrets should move out of appsettings.json
 EF model warnings need cleanup
 Dashboard nullable warnings need cleanup; CI passes but reports nullable warnings
-Duplicate Azure.Storage.Blobs package reference needs cleanup after Dependabot conflict resolution
 ```
 
 Full issue details are tracked in [docs/KNOWN_ISSUES_AND_FIX_PLAN.md](docs/KNOWN_ISSUES_AND_FIX_PLAN.md).
@@ -213,17 +233,17 @@ Full issue details are tracked in [docs/KNOWN_ISSUES_AND_FIX_PLAN.md](docs/KNOWN
 Next engineering milestones:
 
 ```text
-1. Remove duplicate Azure.Storage.Blobs package reference from the merged dependency updates.
-2. Add CodeQL SAST scanning.
-3. Decouple blob storage initialization from unrelated requests.
-4. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.
-5. Create a Postman collection for the validated API flow.
+1. Create a Postman collection for the validated API flow.
+2. Run the collection locally with Newman.
+3. Add Gitleaks secret scanning.
+4. Decouple blob storage initialization from unrelated requests.
+5. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.
 6. Add automated integration tests.
 7. Add Docker Compose for SQL Server and Azurite dependencies.
-8. Add secret scanning and container scanning.
-9. Create a SQL Server performance baseline.
+8. Add container scanning after container work exists.
+9. Create a SQL Server performance baseline using the Grafana dashboard as evidence.
 10. Prevent duplicate lookup values where the domain requires uniqueness.
-11. Deploy to Azure with Terraform and add monitoring.
+11. Deploy to Azure with Terraform and add cloud monitoring.
 ```
 
 The full roadmap is in [docs/QA_DEVSECOPS_CLOUD_ROADMAP.md](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md).

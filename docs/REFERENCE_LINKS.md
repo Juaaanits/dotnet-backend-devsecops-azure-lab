@@ -60,6 +60,19 @@ This file collects official or primary reference links for the technologies and 
 | ZAP baseline GitHub Action | https://github.com/zaproxy/action-baseline | GitHub Action for passive baseline web security scanning. |
 | OWASP DevSecOps DAST guideline | https://github.com/OWASP/DevSecOpsGuideline/blob/master/current-version/2-Process/2-4-Test/2-4-2-Dynamic-Application-Security-Testing.md | Useful conceptual reference for DAST in CI/CD. |
 
+## Observability and SQL Server Monitoring
+
+| Topic | Link | Why It Matters |
+| --- | --- | --- |
+| Grafana Microsoft SQL Server datasource | https://grafana.com/docs/grafana/latest/datasources/mssql/configure/ | Main reference for connecting Grafana to SQL Server. |
+| Grafana provisioning | https://grafana.com/tutorials/provision-dashboards-and-data-sources/ | Explains file-based datasource and dashboard provisioning used by this repo. |
+| Grafana dashboard JSON model | https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/view-dashboard-json-model/ | Useful when exporting, reviewing, and versioning dashboard JSON. |
+| SQL Server fixed TCP port | https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-a-server-to-listen-on-a-specific-tcp-port | Required when Dockerized Grafana connects to local SQL Server on port 1433. |
+| Docker Desktop host networking | https://docs.docker.com/desktop/features/networking/networking-how-tos/ | Explains `host.docker.internal`, which Grafana uses to reach SQL Server on Windows. |
+| SQL Server server-level roles | https://learn.microsoft.com/en-us/sql/relational-databases/security/authentication-access/server-level-roles | Helps avoid over-granting sysadmin when creating monitoring users. |
+| GRANT system object permissions | https://learn.microsoft.com/en-us/sql/t-sql/statements/grant-system-object-permissions-transact-sql | Reference for scoped permissions needed by monitoring queries. |
+| Microsoft SQL Server with Grafana dashboard source | https://github.com/czantoine/microsoft-sql-server-with-grafana | MIT-licensed dashboard imported and adapted for this Sakenny observability lab. |
+
 ## Docker and Containers
 
 | Topic | Link | Why It Matters |

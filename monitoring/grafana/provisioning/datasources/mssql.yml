@@ -1,0 +1,19 @@
+apiVersion: 1
+
+datasources:
+  - name: Sakenny SQL Server
+    uid: sakenny-mssql
+    type: mssql
+    access: proxy
+    url: ${GF_MSSQL_HOST}
+    user: ${GF_MSSQL_USER}
+    jsonData:
+      database: ${GF_MSSQL_DATABASE}
+      encrypt: "false"
+      maxOpenConns: 10
+      maxIdleConns: 5
+      maxIdleConnsAuto: false
+      connMaxLifetime: 14400
+      connectionTimeout: 10
+    secureJsonData:
+      password: ${GF_MSSQL_PASSWORD}

@@ -8,7 +8,7 @@ Sakenny Backend QA, DevSecOps, and Cloud Engineering Lab
 
 ## Short Resume Version
 
-Validated and extended an MIT-licensed ASP.NET Core property rental backend as an Automation QA, DevSecOps, and Cloud Engineering portfolio project. Reproduced the local environment with SQL Server and Azurite, verified JWT role-based workflows through Swagger, documented API test paths, identified backend defects, added an initial GitHub Actions build quality gate, enabled Dependabot dependency monitoring, and created a roadmap for automated testing, security scanning, SQL Server performance tuning, Docker, Terraform, and Azure deployment.
+Validated and extended an MIT-licensed ASP.NET Core property rental backend as an Automation QA, DevSecOps, and Cloud Engineering portfolio project. Reproduced the local environment with SQL Server and Azurite, verified JWT role-based workflows through Swagger, documented API test paths, identified backend defects, added a GitHub Actions build quality gate, enabled Dependabot dependency monitoring, added CodeQL scanning, and added a local Grafana SQL Server dashboard with a dedicated read-only monitoring login.
 
 ## Interview Explanation
 
@@ -18,7 +18,7 @@ My first goal was not to rewrite code. I focused on getting the backend running 
 
 During that process I found practical issues: missing authentication middleware, a Services API contract mismatch, public mutation endpoints, hardcoded secrets, route inconsistencies, and infrastructure coupling caused by blob storage initialization. I fixed and validated the first authorization/API contract issues, then documented the remaining backlog with impact, planned fix, and validation criteria so the project can evolve through controlled improvements.
 
-The next phase is to extend the CI pipeline with automated API tests, CodeQL, secret scanning, and container scanning, then containerize the backend, deploy it to Azure with Terraform, and measure SQL Server performance before and after database tuning.
+The next phase is to turn the validated API flow into a Postman/Newman smoke suite, add secret scanning, then use the Grafana dashboard as evidence while measuring SQL Server behavior before and after tuning work.
 
 ## What I Have Proven So Far
 
@@ -41,6 +41,9 @@ Services API creates Name + Icon through the API
 Type and Services mutation endpoints enforce 401/403/200 authorization behavior
 GitHub Actions restore/build workflow passes
 Dependabot creates dependency update PRs for GitHub Actions and NuGet packages
+CodeQL C# scanning is merged
+Grafana SQL Server dashboard connects to SakennyDB
+Dashboard uses a dedicated grafana_reader SQL login instead of sysadmin
 ```
 
 ## Defects Discovered Through Testing
@@ -65,6 +68,10 @@ Protected Type and Services POST/PUT/DELETE endpoints with Admin authorization
 Validated no-token, Host-token, and Admin-token behavior with 401/403/200 responses
 Added GitHub Actions .NET restore/build validation
 Enabled Dependabot monitoring for NuGet and GitHub Actions dependencies
+Cleaned duplicate Azure.Storage.Blobs package reference after dependency conflict resolution
+Added CodeQL C# SAST scanning
+Added Grafana SQL Server monitoring through Docker Compose
+Validated read-only Grafana datasource permissions
 ```
 
 ## CI And Dependency Monitoring Evidence
@@ -89,7 +96,26 @@ Review note:
 GitHub Actions version bumps are low-risk when CI passes.
 Azure SDK patch/minor updates should be merged one at a time after CI passes.
 AutoMapper 15.0.1 to 16.2.0 is a major version update and should be followed by local API smoke testing.
-Post-merge audit found a duplicate Azure.Storage.Blobs package reference that should be cleaned before the next DevSecOps stage.
+Post-merge audit found a duplicate Azure.Storage.Blobs package reference, which was cleaned before the next DevSecOps stage.
+```
+
+## Observability Evidence
+
+```text
+Grafana runs locally through Docker Compose.
+The SQL Server datasource is provisioned from environment variables.
+The dashboard JSON is stored in monitoring/grafana/dashboards.
+The monitoring login uses scoped read permissions.
+SQL Agent job history permissions were fixed through msdb object-level SELECT grants.
+Some local panels correctly show No data when the development database has no jobs, backups, or long-running workload.
+```
+
+Evidence screenshots:
+
+```text
+docs/evidence/grafana-sql-dashboard-overview.png
+docs/evidence/grafana-sql-dashboard-security-monitoring.png
+docs/evidence/grafana-sql-dashboard-index-health.png
 ```
 
 ## Why This Project Fits My Target Roles
@@ -125,6 +151,7 @@ Azure SQL deployment path
 Key Vault and managed identity roadmap
 Terraform infrastructure plan
 Monitoring and observability roadmap
+Local Grafana SQL Server dashboard
 ```
 
 SQL Server:
@@ -141,12 +168,13 @@ Measured before/after optimization plan
 ## Next Measurable Outcomes
 
 ```text
-Clean duplicate Azure.Storage.Blobs package reference from the merged dependency updates
-Add Postman collection and Newman CI run
+Add Postman collection and Newman local run
+Add Newman CI run after the collection is stable
+Add Gitleaks secret scanning
 Add xUnit integration tests for auth and property flows
 Add Docker Compose for API dependencies
 Extend GitHub Actions CI with tests and security scans
-Create SQL Server performance baseline report
+Create SQL Server performance baseline report using Grafana evidence
 Deploy to Azure with Terraform
 Add monitoring dashboard and alerting notes
 ```

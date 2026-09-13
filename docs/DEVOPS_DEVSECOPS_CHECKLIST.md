@@ -13,6 +13,9 @@ Workflow uses least-privilege contents: read permission.
 Dependabot monitors GitHub Actions dependencies.
 Dependabot monitors NuGet dependencies under /sakenny.
 Initial Dependabot PR queue was processed until 0 open pull requests remained.
+Duplicate Azure.Storage.Blobs package reference was cleaned after dependency conflict resolution.
+CodeQL C# SAST scanning was added and merged.
+SQL Server Grafana observability was added locally.
 ```
 
 Evidence:
@@ -23,6 +26,8 @@ Dependabot opened GitHub Actions update PRs.
 Dependabot opened NuGet update PRs.
 Dependabot PRs showed 2/2 passing checks before review.
 GitHub pull request queue was cleared to 0 open PRs.
+CodeQL workflow completed after code scanning was enabled.
+Grafana dashboard connected to the local SakennyDB SQL Server database.
 ```
 
 Screenshot evidence:
@@ -35,8 +40,11 @@ docs/evidence/github-pr-queue-cleared.png
 
 ```text
 .github/workflows/dotnet-ci.yml
+.github/workflows/codeql.yml
 .github/dependabot.yml
 docs/REFERENCE_LINKS.md
+docs/OBSERVABILITY_SQL_SERVER_GRAFANA.md
+monitoring/grafana/
 ```
 
 ## Current CI Gate
@@ -84,7 +92,7 @@ Watch for package conflict resolution mistakes.
 Finding:
 
 ```text
-origin/main contains duplicate Azure.Storage.Blobs PackageReference entries after Dependabot conflict resolution.
+origin/main contained duplicate Azure.Storage.Blobs PackageReference entries after Dependabot conflict resolution.
 ```
 
 Correct target state:
@@ -96,10 +104,30 @@ Correct target state:
 Cleanup:
 
 ```text
-Remove the older Azure.Storage.Blobs 12.22.2 entry.
-Keep only Azure.Storage.Blobs 12.29.2.
-Validate with dotnet restore and dotnet build.
-Run a short local Swagger smoke test for image upload/property creation paths.
+Completed. The older Azure.Storage.Blobs 12.22.2 entry was removed.
+Only Azure.Storage.Blobs 12.29.2 remains.
+The project was validated by CI after the cleanup.
+```
+
+## Observability Baseline
+
+Completed:
+
+```text
+Grafana runs locally through Docker Compose.
+MSSQL datasource is provisioned from environment variables.
+Dashboard JSON is stored in monitoring/grafana/dashboards.
+Local secrets are excluded through monitoring/grafana/.env.
+Read-only SQL Server login grafana_reader was used instead of sysadmin.
+Scoped msdb SELECT grants fixed SQL Agent history panel permissions.
+```
+
+Evidence:
+
+```text
+docs/evidence/grafana-sql-dashboard-overview.png
+docs/evidence/grafana-sql-dashboard-security-monitoring.png
+docs/evidence/grafana-sql-dashboard-index-health.png
 ```
 
 ## Next DevSecOps Checklist
@@ -107,18 +135,17 @@ Run a short local Swagger smoke test for image upload/property creation paths.
 Immediate:
 
 ```text
-Fix duplicate Azure.Storage.Blobs package reference.
-Add CodeQL SAST scanning.
-Document CodeQL findings or clean run.
+Create a Postman smoke collection for the validated API path.
+Run the collection locally with Newman.
+Add Gitleaks secret scanning.
 ```
 
 Next:
 
 ```text
-Add Gitleaks secret scanning.
-Create a Postman smoke collection.
-Run Postman collection with Newman locally.
 Add Newman to GitHub Actions after the collection is stable.
+Use Grafana screenshots during API smoke/load tests to record SQL Server behavior.
+Start SQL Server performance baseline notes for property listing/filter endpoints.
 ```
 
 Later:
@@ -137,7 +164,7 @@ Move production secrets to Azure Key Vault.
 Use this in a portfolio, interview, or LinkedIn project post:
 
 ```text
-Added a GitHub Actions CI quality gate for the .NET 8 backend and enabled Dependabot monitoring for GitHub Actions and NuGet dependencies. Reviewed the first dependency update queue through passing CI checks, cleared all open Dependabot PRs, and documented a post-merge dependency configuration cleanup item.
+Added a GitHub Actions CI quality gate for the .NET 8 backend, enabled Dependabot monitoring for GitHub Actions and NuGet dependencies, added CodeQL SAST scanning, cleaned a dependency conflict, and added a local Grafana SQL Server dashboard using a dedicated read-only monitoring login.
 ```
 
 ## Branch Cleanup Checklist

@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 appsettings.json
+
+# Local Grafana and SQL Server monitoring secrets
+monitoring/grafana/.env

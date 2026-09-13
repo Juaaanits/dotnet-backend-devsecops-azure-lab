@@ -6,16 +6,16 @@ This document records issues discovered during local validation. The intent is t
 
 | ID | Priority | Area | Status | Finding |
 | --- | --- | --- | --- | --- |
-| BUG-001 | High | Authentication | Fixed locally | JWT authorization required `app.UseAuthentication()` before `app.UseAuthorization()`. |
-| BUG-002 | High | Services API | Fixed locally | `POST /api/Services` failed because `Service.Icon` was required but `AddServiceDTO` did not accept `Icon`. |
-| BUG-003 | Medium | Authorization | Fixed locally | Type and Services mutation endpoints needed Admin-only authorization. |
+| BUG-001 | High | Authentication | Fixed | JWT authorization required `app.UseAuthentication()` before `app.UseAuthorization()`. |
+| BUG-002 | High | Services API | Fixed | `POST /api/Services` failed because `Service.Icon` was required but `AddServiceDTO` did not accept `Icon`. |
+| BUG-003 | Medium | Authorization | Fixed | Type and Services mutation endpoints needed Admin-only authorization. |
 | BUG-004 | Medium | Storage | Open | `BlobService` connects to Azurite during service construction, affecting unrelated requests. |
 | BUG-005 | Medium | API Design | Open | Some routes are absolute and inconsistent with controller route prefixes. |
 | BUG-006 | High | Secrets | Open | JWT key and external service settings are stored in appsettings. |
 | BUG-007 | Low | EF Model | Open | EF logs warnings about required relationships with global query filters. |
 | BUG-008 | Low | EF Model | Open | EF logs warnings about decimal precision on `PropertySnapshot`. |
 | BUG-009 | Low | Code Quality | Open | Build warnings show possible null dereferences in dashboard logic. |
-| BUG-010 | Medium | Dependency Config | Open | `origin/main` contains duplicate `Azure.Storage.Blobs` package references after Dependabot conflict resolution. |
+| BUG-010 | Medium | Dependency Config | Fixed | `origin/main` contained duplicate `Azure.Storage.Blobs` package references after Dependabot conflict resolution. |
 
 ## BUG-001: Missing Authentication Middleware
 
@@ -52,7 +52,7 @@ Public endpoints remain accessible without a token.
 Status:
 
 ```text
-Fixed locally and validated through Swagger.
+Fixed and validated through Swagger.
 ```
 
 ## BUG-002: Services API Cannot Create Valid Rows
@@ -99,7 +99,7 @@ PropertyServices contains the expected relationship rows.
 Status:
 
 ```text
-Fixed locally and validated through Swagger.
+Fixed and validated through Swagger.
 Evidence: POST /api/Services created Service Id 10, Name Sauna, Icon sauna.
 ```
 
@@ -136,7 +136,7 @@ GET remains accessible if public lookup reads are required.
 Status:
 
 ```text
-Fixed locally and validated through Swagger.
+Fixed and validated through Swagger.
 Evidence: Type and Services mutation endpoints returned 401 with no token, 403 with Host token, and 200 with Admin token.
 ```
 
@@ -341,7 +341,7 @@ Dashboard endpoints return stable responses for empty and populated databases.
 Observed behavior:
 
 ```text
-After merging Dependabot PRs, origin/main contains two Azure.Storage.Blobs PackageReference entries:
+After merging Dependabot PRs, origin/main contained two Azure.Storage.Blobs PackageReference entries:
 Azure.Storage.Blobs 12.22.2
 Azure.Storage.Blobs 12.29.2
 ```
@@ -376,15 +376,22 @@ dotnet build passes.
 Swagger smoke tests still pass for login, property creation, property filtering, and image upload paths.
 ```
 
+Status:
+
+```text
+Fixed on main. sakenny.csproj now keeps only Azure.Storage.Blobs 12.29.2.
+CI passed after the cleanup.
+```
+
 ## Execution Order
 
 Recommended implementation order:
 
 ```text
-1. BUG-010: Remove duplicate Azure.Storage.Blobs package reference.
-2. BUG-004: Remove BlobService constructor side effect.
-3. BUG-006: Move secrets out of appsettings.
-4. BUG-005: Standardize route design.
-5. BUG-007/008/009: Clean EF and nullable warnings with tests.
-6. Add regression tests for BUG-001, BUG-002, and BUG-003.
+1. BUG-004: Remove BlobService constructor side effect.
+2. BUG-006: Move secrets out of appsettings.
+3. BUG-005: Standardize route design.
+4. BUG-007/008/009: Clean EF and nullable warnings with tests.
+5. Add regression tests for BUG-001, BUG-002, and BUG-003.
+6. Add Postman/Newman smoke tests for the validated API path.
 ```
