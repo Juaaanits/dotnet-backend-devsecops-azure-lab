@@ -13,12 +13,12 @@ namespace sakenny.Application.Services
 
             var serviceClient = new BlobServiceClient(connectionString);
             _containerClient = serviceClient.GetBlobContainerClient(containerName);
-
-            _containerClient.CreateIfNotExists(PublicAccessType.Blob);
         }
 
         public async Task<string> UploadImageAsync(IFormFile file)
         {
+            await _containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
             // Validate content type
             var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
             if (!allowedTypes.Contains(file.ContentType.ToLower()))

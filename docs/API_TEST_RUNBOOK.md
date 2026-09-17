@@ -112,7 +112,11 @@ Expected result:
 }
 ```
 
-## 3. Register Admin
+## 3. Bootstrap or Register Admin
+
+`/AdminRegister` is now Admin-only. For a fresh local/CI environment, configure all three `BootstrapAdmin` values before startup. The application creates the first Admin only when no user exists for that bootstrap email.
+
+After logging in as an existing Admin, that Admin may create another Admin:
 
 ```http
 POST /AdminRegister
@@ -125,6 +129,14 @@ Content-Type: application/json
   "email": "admin@test.com",
   "password": "Admin@123"
 }
+```
+
+Expected authorization behavior:
+
+```text
+No token + POST /AdminRegister -> 401
+User/Host token               -> 403
+Admin token                   -> success
 ```
 
 ## 4. Login Admin

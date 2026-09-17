@@ -71,6 +71,8 @@ Regression test added
 
 ## Phase 3: API Test Automation
 
+Status: baseline implemented. Expansion remains ongoing.
+
 Recommended stack:
 
 ```text
@@ -86,7 +88,8 @@ Core API scenarios to automate:
 ```text
 Register user
 Login user
-Register admin
+Verify anonymous Admin registration is rejected
+Login bootstrap Admin
 Login admin
 Convert user to Host
 Create property type
@@ -169,7 +172,14 @@ GitHub Actions restore/build quality gate
 Dependabot monitoring for NuGet dependencies
 Dependabot monitoring for GitHub Actions versions
 CodeQL C# SAST scanning
+Gitleaks secret scanning
 Grafana SQL Server observability dashboard
+xUnit regression tests and retained TRX configuration
+Postman/Newman smoke workflow and JUnit configuration
+Docker Compose dependency/application stack
+Trivy container scanning workflow
+Terraform formatting and validation workflow
+Manual Azure OIDC deployment workflow
 ```
 
 Evidence collected:
@@ -244,6 +254,8 @@ Add request logging and correlation IDs
 ```
 
 ## Phase 6: Cloud Deployment
+
+Status: Terraform and deployment workflow implemented and validated statically; Azure plan/apply and runtime evidence pending credentials, budget approval, and security review.
 
 Target Azure architecture:
 
@@ -354,7 +366,7 @@ Problem:
 The cloned backend had no documented local validation process, incomplete API test coverage, secrets/configuration risks, and several runtime/API issues.
 
 Action:
-I established a reproducible SQL Server + Azurite local environment, validated critical role-based API workflows, fixed discovered issues, introduced an initial CI build gate, enabled dependency monitoring and CodeQL scanning, added a local Grafana SQL Server dashboard, and prepared the backlog for automated tests, secret scanning, SQL performance work, and Azure deployment infrastructure.
+I established a reproducible SQL Server + Azurite local environment, validated critical role-based API workflows, fixed discovered issues, introduced an initial CI build gate, enabled dependency monitoring, CodeQL, and Gitleaks scanning, added a local Grafana SQL Server dashboard, and prepared the backlog for automated tests, SQL performance work, and Azure deployment infrastructure.
 
 Result:
 The backend moved from manually tested clone to documented, testable, cloud-ready engineering project with measurable quality and security improvements.

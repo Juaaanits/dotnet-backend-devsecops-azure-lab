@@ -1,0 +1,218 @@
+{
+  "info": {
+    "_postman_id": "68c82c9c-d197-45c3-85cf-e9a9408bdb76",
+    "name": "Sakenny API Smoke Tests",
+    "description": "Dynamic end-to-end smoke tests for health, registration, JWT roles, lookup authorization, public reads, Host access, and Admin dashboard access.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.environment.get('runId')) {",
+          "  const runId = Date.now().toString();",
+          "  pm.environment.set('runId', runId);",
+          "  pm.environment.set('userEmail', `qa-user-${runId}@example.test`);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('health returns 200', () => pm.response.to.have.status(200));",
+        "pm.test('service reports healthy', () => pm.expect(pm.response.json().status).to.eql('healthy'));"
+      ] } }]
+    },
+    {
+      "name": "02 Register User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"firstName\":\"QA\",\"lastName\":\"User\",\"email\":\"{{userEmail}}\",\"password\":\"{{testPassword}}\",\"phoneNumber\":\"01012345678\"}" },
+        "url": "{{baseUrl}}/register"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('user registration returns 200', () => pm.response.to.have.status(200));"
+      ] } }]
+    },
+    {
+      "name": "03 Login User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"{{userEmail}}\",\"password\":\"{{testPassword}}\",\"rememberMe\":false}" },
+        "url": "{{baseUrl}}/login"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('user login returns 200', () => pm.response.to.have.status(200));",
+        "const token = pm.response.json().accessToken;",
+        "pm.expect(token).to.be.a('string').and.not.empty;",
+        "pm.environment.set('userToken', token);",
+        "let part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
+        "while (part.length % 4) part += '=';",
+        "const payload = JSON.parse(atob(part));",
+        "const claim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';",
+        "pm.environment.set('userId', payload[claim]);"
+      ] } }]
+    },
+    {
+      "name": "04 Anonymous Admin Registration Rejected",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"username\":\"blocked-admin-{{runId}}\",\"email\":\"blocked-admin-{{runId}}@example.test\",\"password\":\"{{testPassword}}\"}" },
+        "url": "{{baseUrl}}/AdminRegister"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('anonymous admin registration returns 401', () => pm.response.to.have.status(401));"
+      ] } }]
+    },
+    {
+      "name": "05 Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"{{adminEmail}}\",\"password\":\"{{testPassword}}\",\"rememberMe\":false}" },
+        "url": "{{baseUrl}}/AdminLogin"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('admin login returns 200', () => pm.response.to.have.status(200));",
+        "pm.environment.set('adminToken', pm.response.json().accessToken);"
+      ] } }]
+    },
+    {
+      "name": "06 Public Services Read",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/Services" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('public service read returns 200', () => pm.response.to.have.status(200));"
+      ] } }]
+    },
+    {
+      "name": "07 Anonymous Service Mutation Rejected",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"name\":\"Anonymous {{runId}}\",\"icon\":\"blocked\"}" },
+        "url": "{{baseUrl}}/api/Services"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('anonymous mutation returns 401', () => pm.response.to.have.status(401));"
+      ] } }]
+    },
+    {
+      "name": "08 User Service Mutation Forbidden",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"name\":\"User {{runId}}\",\"icon\":\"blocked\"}" },
+        "url": "{{baseUrl}}/api/Services"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('non-admin mutation returns 403', () => pm.response.to.have.status(403));"
+      ] } }]
+    },
+    {
+      "name": "09 Convert User To Host",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/api/User/ConvertToHost/{{userId}}"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('admin converts user to host', () => pm.response.to.have.status(200));"
+      ] } }]
+    },
+    {
+      "name": "10 Login Host",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"{{userEmail}}\",\"password\":\"{{testPassword}}\",\"rememberMe\":false}" },
+        "url": "{{baseUrl}}/login"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('host login returns 200', () => pm.response.to.have.status(200));",
+        "pm.environment.set('hostToken', pm.response.json().accessToken);"
+      ] } }]
+    },
+    {
+      "name": "11 Host Owned Properties",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }],
+        "url": "{{baseUrl}}/owned-properties"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('host-owned properties returns 200', () => pm.response.to.have.status(200));"
+      ] } }]
+    },
+    {
+      "name": "12 Admin Creates Type",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"name\":\"QA Type {{runId}}\"}" },
+        "url": "{{baseUrl}}/api/Type"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('admin type creation returns 200', () => pm.response.to.have.status(200));"
+      ] } }]
+    },
+    {
+      "name": "13 Admin Creates Service",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"name\":\"QA Service {{runId}}\",\"icon\":\"qa-smoke\"}" },
+        "url": "{{baseUrl}}/api/Services"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('admin service creation returns 200', () => pm.response.to.have.status(200));"
+      ] } }]
+    },
+    {
+      "name": "14 Host Dashboard Forbidden",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{hostToken}}" }],
+        "url": "{{baseUrl}}/api/Dashboard/stats"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('host dashboard returns 403', () => pm.response.to.have.status(403));"
+      ] } }]
+    },
+    {
+      "name": "15 Admin Dashboard",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/api/Dashboard/stats"
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('admin dashboard returns 200', () => pm.response.to.have.status(200));"
+      ] } }]
+    },
+    {
+      "name": "16 Public Properties",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/Property/all" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('public properties returns 200', () => pm.response.to.have.status(200));"
+      ] } }]
+    }
+  ]
+}

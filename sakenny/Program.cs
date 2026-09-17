@@ -152,11 +152,26 @@ namespace sakenny
             //app.UseCors("AllowAll");
 
             app.MapControllers();
+            app.MapGet("/health", () => Results.Ok(new
+            {
+                status = "healthy",
+                service = "sakenny-api"
+            })).AllowAnonymous();
+
             // Create roles at startup
             using (var scope = app.Services.CreateScope())
             {
+                if (builder.Configuration.GetValue<bool>("Database:ApplyMigrations"))
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+                    await dbContext.Database.MigrateAsync();
+                }
+
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 await AssignRoles(roleManager);
+
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                await EnsureBootstrapAdmin(userManager, builder.Configuration);
             }
 
             app.Run();
@@ -176,7 +191,38 @@ namespace sakenny
             return true;
         }
 
-      
+        private static async Task EnsureBootstrapAdmin(
+            UserManager<IdentityUser> userManager,
+            IConfiguration configuration)
+        {
+            var email = configuration["BootstrapAdmin:Email"];
+            var password = configuration["BootstrapAdmin:Password"];
+            var username = configuration["BootstrapAdmin:Username"] ?? email;
 
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                return;
+
+            var admin = await userManager.FindByEmailAsync(email);
+            if (admin == null)
+            {
+                admin = new Admin { UserName = username, Email = email };
+                var createResult = await userManager.CreateAsync(admin, password);
+                if (!createResult.Succeeded)
+                {
+                    var errors = string.Join("; ", createResult.Errors.Select(error => error.Description));
+                    throw new InvalidOperationException($"Bootstrap Admin creation failed: {errors}");
+                }
+            }
+
+            if (!await userManager.IsInRoleAsync(admin, "Admin"))
+            {
+                var roleResult = await userManager.AddToRoleAsync(admin, "Admin");
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join("; ", roleResult.Errors.Select(error => error.Description));
+                    throw new InvalidOperationException($"Bootstrap Admin role assignment failed: {errors}");
+                }
+            }
+        }
     }
 }

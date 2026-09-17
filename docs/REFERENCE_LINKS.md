@@ -13,6 +13,7 @@ This file collects official or primary reference links for the technologies and 
 | ASP.NET Core configuration | https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration | Explains configuration sources such as appsettings, environment variables, and user secrets. |
 | Safe storage of app secrets in development | https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets | Relevant to moving JWT, Stripe, Google, and storage secrets out of appsettings. |
 | ASP.NET Core integration tests | https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests | Relevant to future automated API and authorization tests. |
+| ASP.NET Core health checks | https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks | Background for the lightweight `/health` endpoint and future dependency-aware checks. |
 
 ## GitHub Actions and CI/CD
 
@@ -51,6 +52,7 @@ This file collects official or primary reference links for the technologies and 
 | Newman CLI | https://learning.postman.com/docs/reference/newman-cli/command-line-integration-with-newman | Runs Postman collections from the command line and CI. |
 | Install and run Newman | https://learning.postman.com/docs/reference/newman-cli/installing-running-newman | Setup and execution reference for collection runs. |
 | ASP.NET Core integration tests | https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests | Best future path for automated backend regression tests. |
+| `dotnet test` | https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test | Runs the xUnit regression project locally and in CI. |
 
 ## Dynamic Security Testing
 
@@ -80,6 +82,8 @@ This file collects official or primary reference links for the technologies and 
 | Docker .NET guide | https://docs.docker.com/guides/dotnet/ | Practical Docker guide for .NET applications. |
 | Containerize a .NET app | https://learn.microsoft.com/en-us/dotnet/core/docker/build-container | Microsoft reference for Dockerfile-based .NET containerization. |
 | Containerize with `dotnet publish` | https://learn.microsoft.com/en-us/dotnet/core/containers/sdk-publish | Alternative .NET SDK container publishing flow. |
+| Docker Compose | https://docs.docker.com/compose/ | Defines and operates the local SQL Server, Azurite, API, and Grafana stack. |
+| Azurite connection strings | https://learn.microsoft.com/en-us/azure/storage/common/storage-connect-azurite | Documents local Azure Storage emulator endpoints and credentials. |
 
 ## Azure and Cloud Engineering
 
@@ -91,6 +95,9 @@ This file collects official or primary reference links for the technologies and 
 | Terraform on Azure | https://learn.microsoft.com/en-us/azure/developer/terraform/ | Microsoft landing page for Terraform on Azure. |
 | AzureRM Terraform provider | https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs | Official provider reference for provisioning Azure resources with Terraform. |
 | Terraform GitHub Actions automation | https://developer.hashicorp.com/terraform/tutorials/automation/github-actions | How Terraform can later run from GitHub Actions. |
+| Azure OIDC from GitHub | https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect | Passwordless GitHub Actions authentication used by the manual deployment workflow. |
+| App Service Key Vault references | https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references | Allows the managed Web App identity to resolve runtime secrets without plaintext settings. |
+| Terraform sensitive data | https://developer.hashicorp.com/terraform/language/manage-sensitive-data | Explains sensitive variables, state exposure, and secret-handling limits. |
 
 ## SQL Server Performance and Database Reliability
 

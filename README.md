@@ -6,7 +6,7 @@ The original Sakenny backend is a .NET 8 property rental API with SQL Server, AS
 
 ## Project Status
 
-Current phase: local backend validation, first bug-fix validation, CI/dependency monitoring, CodeQL SAST, and local SQL Server observability completed.
+Current phase: local validation, automated QA, CI/security gates, container orchestration, SQL observability, and validated Azure Terraform baseline completed. Azure resources have not been provisioned.
 
 Validated on 2026-09-05:
 
@@ -49,6 +49,11 @@ Dependabot PRs showed 2/2 passing checks before review
 Initial Dependabot PR queue was cleared to 0 open pull requests
 CodeQL C# scanning was added and merged after repository code scanning was enabled
 SQL Server monitoring dashboard runs locally through Grafana and Docker
+xUnit authorization/storage regression tests are part of the solution
+Postman/Newman smoke automation covers public, User, Host, and Admin behavior
+Docker Compose defines SQL Server, Azurite, API, SQL initialization, and Grafana
+Trivy container scanning and Terraform validation workflows are defined
+Terraform validation passes for the Azure App Service, SQL, Storage, Key Vault, and monitoring baseline
 ```
 
 Evidence screenshot:
@@ -68,13 +73,13 @@ This project is being developed as a practical portfolio lab for:
 Automation QA
 API test planning
 Postman/Newman automation
-ASP.NET Core integration testing
+ASP.NET Core/xUnit regression testing
 SQL Server validation and performance analysis
 DevSecOps quality gates
 Secret management
 Container and dependency scanning
 Azure deployment readiness
-Terraform infrastructure planning
+Terraform infrastructure validation and Azure deployment readiness
 Monitoring and operational visibility
 ```
 
@@ -91,7 +96,11 @@ The project documentation is organized as evidence of the validation and improve
 | [DevOps and DevSecOps Checklist](docs/DEVOPS_DEVSECOPS_CHECKLIST.md) | Permanent checklist for CI, Dependabot, security gates, evidence, and next DevSecOps tasks. |
 | [SQL Server Observability With Grafana](docs/OBSERVABILITY_SQL_SERVER_GRAFANA.md) | Local Grafana + SQL Server monitoring setup, permissions, dashboard evidence, and troubleshooting notes. |
 | [QA, DevSecOps, and Cloud Roadmap](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md) | Roadmap for automated QA, security gates, CI/CD, SQL tuning, Terraform, and Azure. |
-| [Portfolio Case Study Draft](docs/PORTFOLIO_CASE_STUDY_DRAFT.md) | Recruiter/interview-facing summary of the project direction and evidence. |
+| [Technical Case Study and Onboarding Handbook](docs/SAKENNY_TECHNICAL_CASE_STUDY.md) | Canonical portfolio narrative and compilation guide for the full 20-30 page handbook. |
+| [Automated QA and Container Runbook](docs/AUTOMATED_QA_AND_CONTAINER_RUNBOOK.md) | xUnit, Postman/Newman, Docker Compose, CI artifacts, and troubleshooting. |
+| [Terraform and Azure Deployment Guide](docs/TERRAFORM_AZURE_DEPLOYMENT.md) | Validated infrastructure, OIDC deployment steps, costs, security boundaries, and production backlog. |
+| [Final Project Status](docs/FINAL_PROJECT_STATUS.md) | Evidence matrix separating implemented, verified, and external credential-dependent work. |
+| [Portfolio Case Study Draft](docs/PORTFOLIO_CASE_STUDY_DRAFT.md) | Short recruiter/interview-facing summary retained for quick review. |
 | [Reference Links](docs/REFERENCE_LINKS.md) | Categorized official references for .NET, QA, DevSecOps, CI/CD, Docker, Azure, Terraform, SQL Server, k6, and AWS cloud concepts. |
 
 ## Tech Stack
@@ -116,20 +125,32 @@ Engineering workflow being added around it:
 
 ```text
 Manual API validation
-Postman collection planning
-Newman test automation plan
-xUnit integration testing plan
-Docker/Docker Compose plan
+Postman collection and Newman JUnit automation
+xUnit regression tests
+Docker/Docker Compose local stack
 GitHub Actions CI build gate
 Dependabot dependency monitoring
 CodeQL SAST scanning
 Grafana SQL Server observability dashboard
-SAST/secret/container scanning plan
-Terraform and Azure deployment plan
+SAST, secret, and container scanning
+Validated Terraform and manual OIDC Azure deployment workflow
 SQL Server performance baseline plan
 ```
 
 ## Local Run Summary
+
+The fastest reproducible path is the root container stack:
+
+```powershell
+Copy-Item .env.example .env
+# Replace every placeholder value in the ignored .env file.
+.\scripts\dev-up.ps1
+.\scripts\test-smoke.ps1
+```
+
+This exposes the API at `http://localhost:5111`, Grafana at `http://localhost:3000`, and container SQL Server at `localhost,14330`. Detailed instructions are in [docs/AUTOMATED_QA_AND_CONTAINER_RUNBOOK.md](docs/AUTOMATED_QA_AND_CONTAINER_RUNBOOK.md).
+
+The original Windows-hosted setup remains available below.
 
 Prerequisites:
 
@@ -178,6 +199,16 @@ https://localhost:7279/swagger/index.html
 
 Detailed setup and validation steps are in [docs/LOCAL_SETUP_AND_VALIDATION.md](docs/LOCAL_SETUP_AND_VALIDATION.md).
 
+Build the combined portfolio book:
+
+```powershell
+.\scripts\build-portfolio.ps1
+# With Pandoc and a PDF engine installed:
+.\scripts\build-portfolio.ps1 -Pdf
+```
+
+Generated Markdown, HTML, and PDF files are written to ignored `artifacts/portfolio/` so the maintained source remains the documentation under `docs/`.
+
 ## Manual Validation Completed
 
 The following end-to-end API flow has been tested locally:
@@ -185,7 +216,7 @@ The following end-to-end API flow has been tested locally:
 ```text
 Register user
 Login user
-Register admin
+Use a configured bootstrap Admin or register another Admin while authenticated as Admin
 Login admin
 Convert user to Host
 Create property type
@@ -219,7 +250,8 @@ Type and Services mutation endpoints needed Admin-only protection - fixed and va
 Duplicate Azure.Storage.Blobs package reference was cleaned after Dependabot conflict resolution
 CodeQL C# scanning was added after enabling GitHub code scanning
 Grafana SQL Server monitoring was added with a dedicated read-only database login
-BlobService connects to Azurite during service construction
+BlobService constructor storage coupling was removed and regression-tested
+Anonymous Admin registration was closed; first-Admin creation now requires explicit bootstrap configuration
 Some routes use absolute paths and are inconsistent
 Secrets should move out of appsettings.json
 EF model warnings need cleanup
@@ -230,20 +262,18 @@ Full issue details are tracked in [docs/KNOWN_ISSUES_AND_FIX_PLAN.md](docs/KNOWN
 
 ## Roadmap
 
-Next engineering milestones:
+Remaining engineering milestones:
 
 ```text
-1. Create a Postman collection for the validated API flow.
-2. Run the collection locally with Newman.
-3. Add Gitleaks secret scanning.
-4. Decouple blob storage initialization from unrelated requests.
-5. Move sensitive configuration to user-secrets, environment variables, and later Azure Key Vault.
-6. Add automated integration tests.
-7. Add Docker Compose for SQL Server and Azurite dependencies.
-8. Add container scanning after container work exists.
-9. Create a SQL Server performance baseline using the Grafana dashboard as evidence.
-10. Prevent duplicate lookup values where the domain requires uniqueness.
-11. Deploy to Azure with Terraform and add cloud monitoring.
+1. Retain the first successful xUnit, Newman, Trivy, and Terraform artifacts from GitHub Actions.
+2. Add database-backed integration tests for high-risk business flows.
+3. Create a SQL Server performance baseline using API load and Grafana evidence.
+4. Resolve nullable, EF relationship, and decimal-precision warnings with targeted tests.
+5. Standardize API routes with a backward-compatibility plan.
+6. Prevent duplicate lookup values where the domain requires uniqueness.
+7. Review an Azure Terraform plan, expected cost, and security exposure.
+8. Provision a temporary Azure environment only after approval, then run deployment smoke tests.
+9. Add remote Terraform state, private networking, alerts, and backup/restore evidence.
 ```
 
 The full roadmap is in [docs/QA_DEVSECOPS_CLOUD_ROADMAP.md](docs/QA_DEVSECOPS_CLOUD_ROADMAP.md).
