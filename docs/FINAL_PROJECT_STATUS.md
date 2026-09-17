@@ -33,6 +33,8 @@ BlobService no longer performs storage network I/O in its constructor.
 Local and CI secrets are supplied through environment configuration.
 Azure design stores runtime secrets in Key Vault and uses managed identity.
 Grafana uses a dedicated monitoring login rather than sysadmin.
+ASP.NET Core and EF Core packages were updated to the patched 8.0.31 release line.
+The API image pins patched .NET 8 images and upgrades the affected PCRE2 runtime package.
 ```
 
 ## Automated QA Scope
@@ -50,6 +52,7 @@ Terraform validation: passed
 Docker Compose interpolation/configuration: passed
 Postman collection JSON parsing: passed
 .NET Release test run: passed, 11 tests, 0 failures, 0 skipped
+NuGet vulnerability audit: no vulnerable packages reported by configured sources
 Docker image and full Compose runtime: pending because Docker Desktop could not start
 Newman against the Compose API: pending for the same local runtime dependency
 Azure plan/apply/runtime smoke: intentionally pending external credentials and budget approval
