@@ -1,4 +1,4 @@
-# Sakenny Backend QA, DevSecOps, and Cloud Engineering Lab
+# .NET Backend Reliability, DevSecOps & Azure Engineering Lab
 
 This repository is my personal engineering extension of the MIT-licensed Sakenny backend project. I cloned the original project to practice the kind of work expected from an Automation QA, DevSecOps, and Cloud Engineer: reproducing an existing backend locally, validating its behavior, finding defects, documenting the workflow, planning automated tests, improving security posture, and preparing it for cloud deployment.
 
