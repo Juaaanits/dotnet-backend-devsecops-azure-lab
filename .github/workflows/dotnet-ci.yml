@@ -33,3 +33,13 @@ jobs:
 
       - name: Build
         run: dotnet build ./sakenny.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test ./sakenny.sln --configuration Release --no-build --logger "trx;LogFileName=unit-tests.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: dotnet-test-results
+          path: "**/TestResults/*.trx"

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using sakenny.Application.DTO;
 using sakenny.Application.Services;
@@ -17,6 +18,7 @@ namespace sakenny.API.Controllers
         {
             _adminService = adminService;
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost("/AdminRegister")]
         public async Task<IActionResult> registerAdmin([FromBody] AdminRegisterDTO model)
         {

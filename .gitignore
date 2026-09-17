@@ -366,3 +366,7 @@ appsettings.json
 
 # Local Grafana and SQL Server monitoring secrets
 monitoring/grafana/.env
+
+# Root Docker Compose secrets and generated QA reports
+/.env
+/artifacts/

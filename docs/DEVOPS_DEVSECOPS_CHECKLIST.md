@@ -15,7 +15,14 @@ Dependabot monitors NuGet dependencies under /sakenny.
 Initial Dependabot PR queue was processed until 0 open pull requests remained.
 Duplicate Azure.Storage.Blobs package reference was cleaned after dependency conflict resolution.
 CodeQL C# SAST scanning was added and merged.
+Gitleaks secret scanning was added and merged.
 SQL Server Grafana observability was added locally.
+Postman/Newman smoke collection and JUnit reporting were added.
+xUnit regression tests were added to the solution.
+Docker Compose now orchestrates SQL Server, Azurite, API, SQL initialization, and Grafana.
+Trivy container scanning workflow was added.
+Terraform Azure baseline and validation workflow were added.
+Manual OIDC Azure Web App deployment workflow was added.
 ```
 
 Evidence:
@@ -41,20 +48,34 @@ docs/evidence/github-pr-queue-cleared.png
 ```text
 .github/workflows/dotnet-ci.yml
 .github/workflows/codeql.yml
+.github/workflows/gitleaks.yml
 .github/dependabot.yml
 docs/REFERENCE_LINKS.md
 docs/OBSERVABILITY_SQL_SERVER_GRAFANA.md
 monitoring/grafana/
+postman/
+tests/Sakenny.Tests/
+docker-compose.yml
+Dockerfile
+infra/terraform/
+.github/workflows/api-smoke.yml
+.github/workflows/container-security.yml
+.github/workflows/terraform.yml
+.github/workflows/azure-deploy.yml
 ```
 
 ## Current CI Gate
 
-The first CI gate is intentionally small:
+The CI baseline now includes:
 
 ```text
 Restore NuGet dependencies.
 Build the .NET 8 solution in Release mode.
-Fail the PR if restore/build fails.
+Run xUnit and retain TRX output.
+Run Postman/Newman against SQL Server and Azurite service containers.
+Scan source with CodeQL and Gitleaks.
+Build and scan the container with Trivy.
+Validate Terraform formatting and configuration.
 ```
 
 Why this was the correct first gate:
@@ -135,15 +156,14 @@ docs/evidence/grafana-sql-dashboard-index-health.png
 Immediate:
 
 ```text
-Create a Postman smoke collection for the validated API path.
-Run the collection locally with Newman.
-Add Gitleaks secret scanning.
+Push the final branch and retain the first Newman, xUnit, Trivy, and Terraform workflow evidence.
+Review scanner findings instead of suppressing them automatically.
+Pin container image versions after the first successful compatibility run.
 ```
 
 Next:
 
 ```text
-Add Newman to GitHub Actions after the collection is stable.
 Use Grafana screenshots during API smoke/load tests to record SQL Server behavior.
 Start SQL Server performance baseline notes for property listing/filter endpoints.
 ```
@@ -151,12 +171,10 @@ Start SQL Server performance baseline notes for property listing/filter endpoint
 Later:
 
 ```text
-Add Docker Compose for SQL Server and Azurite.
-Add integration tests with WebApplicationFactory.
-Add Trivy scan after Docker/container work exists.
+Add database-backed integration tests with WebApplicationFactory/Testcontainers.
 Add OWASP ZAP baseline scan after a deployed/stable local target exists.
-Prepare Azure deployment with Terraform.
-Move production secrets to Azure Key Vault.
+Review and apply Terraform only with an approved Azure subscription and budget.
+Add remote Terraform state, private endpoints, alerts, backup/restore testing, and deployment approvals.
 ```
 
 ## Resume Summary

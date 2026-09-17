@@ -1,0 +1,103 @@
+name: API Smoke Tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  newman:
+    name: Newman integration smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: Local_CI-Password123!
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Local_CI-Password123!' -C -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+          --health-start-period 30s
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite:latest
+        ports:
+          - 10000:10000
+          - 10001:10001
+          - 10002:10002
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Restore and build
+        run: |
+          dotnet restore ./sakenny.sln
+          dotnet build ./sakenny.sln --configuration Release --no-restore
+
+      - name: Start API
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ASPNETCORE_URLS: http://127.0.0.1:5111
+          ConnectionStrings__DefaultConnection: Server=127.0.0.1,1433;Database=SakennyDB;User Id=sa;Password=Local_CI-Password123!;TrustServerCertificate=True;Encrypt=False
+          Database__ApplyMigrations: "true"
+          AzureBlobStorage__ConnectionString: UseDevelopmentStorage=true
+          AzureBlobStorage__ContainerName: images
+          Jwt__Issuer: sakenny-ci
+          Jwt__Audience: sakenny-ci-client
+          Jwt__Key: CI_Only-Random-Jwt-Key-With-At-Least-32-Characters!
+          Jwt__ExpiryMinutes: "60"
+          Jwt__RememberMeExpiryMinutes: "10080"
+          Jwt__RefreshTokenExpiryDays: "7"
+          Jwt__RememberMeRefreshTokenExpiryDays: "30"
+          BootstrapAdmin__Username: qa-admin
+          BootstrapAdmin__Email: qa-admin@example.test
+          BootstrapAdmin__Password: QaSmoke@12345
+        run: |
+          dotnet run --project ./sakenny/sakenny.csproj --configuration Release --no-build > api.log 2>&1 &
+          echo $! > api.pid
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:5111/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat api.log
+          exit 1
+
+      - name: Run Newman
+        run: |
+          mkdir -p artifacts
+          npx --yes newman run ./postman/Sakenny.postman_collection.json \
+            --environment ./postman/Sakenny.postman_environment.json.example \
+            --env-var baseUrl=http://127.0.0.1:5111 \
+            --reporters cli,junit \
+            --reporter-junit-export ./artifacts/newman-smoke.xml
+
+      - name: Upload smoke-test evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: newman-smoke-results
+          path: |
+            artifacts/newman-smoke.xml
+            api.log

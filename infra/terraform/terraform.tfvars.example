@@ -1,0 +1,11 @@
+project_name = "sakennylab"
+environment  = "dev"
+location     = "southeastasia"
+bootstrap_admin_username = "qa-admin"
+bootstrap_admin_email    = "qa-admin@example.test"
+
+tags = {
+  project     = "sakenny-qa-devsecops-lab"
+  environment = "dev"
+  managed_by  = "terraform"
+}

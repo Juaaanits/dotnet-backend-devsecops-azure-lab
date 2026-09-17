@@ -1,6 +1,6 @@
 # Local Setup and Validation Report
 
-Status: validated locally on 2026-09-05. First bug-fix validation also completed for authentication middleware, Services API creation, and Admin-only lookup mutations.
+Status: manual environment validated on 2026-09-05; automation and container-readiness update completed on 2026-09-17.
 
 This document records the backend setup and manual validation completed for the Sakenny backend clone. The goal was to prove the API can run locally with SQL Server, Swagger, JWT authentication, and local Azure Blob emulation before starting bug fixes and automation work.
 
@@ -103,7 +103,7 @@ The following backend flow was tested successfully:
 3. Started Azurite for local blob storage.
 4. Verified startup role creation in `AspNetRoles`.
 5. Registered a normal user through `/register`.
-6. Registered an admin through `/AdminRegister`.
+6. Used an explicitly configured bootstrap Admin, then protected `/AdminRegister` for Admin-only use.
 7. Logged in through `/login` and `/AdminLogin`.
 8. Used Swagger JWT authorization.
 9. Converted a user from `User` to `Host`.
@@ -169,7 +169,20 @@ Property 2 -> Service 7
 
 - The database is empty after migrations by design. Migrations create schema; they do not seed sample users, services, property types, or properties.
 - Roles are created at application startup, not by migration seed data.
-- Azurite must be running because `BlobService` creates the blob container when the dependent service is constructed.
+- `BlobService` construction no longer contacts Azurite. Azurite is required only for image-storage operations.
 - Swagger bearer authorization should receive the raw token only when Swagger already applies the `Bearer` scheme.
 - Host/admin role changes require a fresh login because the JWT contains role claims at token creation time.
 - Type and Services mutation endpoints now follow the expected authorization matrix: no token returns 401, Host token returns 403, and Admin token returns 200.
+- `/AdminRegister` is Admin-only. Fresh environments must configure all `BootstrapAdmin` values once or provision an Admin through another controlled process.
+
+## Reproducible Container Option
+
+The root Compose stack now runs SQL Server, Azurite, the API, SQL permission initialization, and Grafana together:
+
+```powershell
+Copy-Item .env.example .env
+# Replace every placeholder value in .env.
+.\scripts\dev-up.ps1
+```
+
+The container API is available at `http://localhost:5111` and SQL Server is published at `localhost,14330` to avoid conflicting with a Windows SQL Server on `1433`. See [Automated QA and Container Runbook](AUTOMATED_QA_AND_CONTAINER_RUNBOOK.md).

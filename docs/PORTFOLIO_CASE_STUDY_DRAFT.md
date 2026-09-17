@@ -1,5 +1,7 @@
 # Portfolio Case Study Draft
 
+For the canonical long-form portfolio and onboarding document, see [SAKENNY_TECHNICAL_CASE_STUDY.md](SAKENNY_TECHNICAL_CASE_STUDY.md).
+
 Project name:
 
 ```text
@@ -8,7 +10,7 @@ Sakenny Backend QA, DevSecOps, and Cloud Engineering Lab
 
 ## Short Resume Version
 
-Validated and extended an MIT-licensed ASP.NET Core property rental backend as an Automation QA, DevSecOps, and Cloud Engineering portfolio project. Reproduced the local environment with SQL Server and Azurite, verified JWT role-based workflows through Swagger, documented API test paths, identified backend defects, added a GitHub Actions build quality gate, enabled Dependabot dependency monitoring, added CodeQL scanning, and added a local Grafana SQL Server dashboard with a dedicated read-only monitoring login.
+Validated and extended an MIT-licensed ASP.NET Core property rental backend as an Automation QA, DevSecOps, and Cloud Engineering portfolio project. Added xUnit and Postman/Newman regression checks, a Docker Compose application stack, GitHub build/security/container/Terraform gates, least-privilege Grafana SQL monitoring, and validated Azure Terraform using Key Vault and managed identity.
 
 ## Interview Explanation
 
@@ -16,9 +18,9 @@ I wanted a project that was closer to real engineering work than a fresh CRUD ap
 
 My first goal was not to rewrite code. I focused on getting the backend running locally and proving the main workflows. I configured SQL Server, applied EF Core migrations, started Azurite for local blob storage, ran the API through Swagger, created users and roles, tested JWT authorization, created and approved properties, uploaded images, tested filtering, and validated the database tables directly.
 
-During that process I found practical issues: missing authentication middleware, a Services API contract mismatch, public mutation endpoints, hardcoded secrets, route inconsistencies, and infrastructure coupling caused by blob storage initialization. I fixed and validated the first authorization/API contract issues, then documented the remaining backlog with impact, planned fix, and validation criteria so the project can evolve through controlled improvements.
+During that process I found practical issues: missing authentication middleware, a Services API contract mismatch, public mutation endpoints, anonymous Admin creation, hardcoded secrets, route inconsistencies, and infrastructure coupling caused by blob storage initialization. I fixed the authentication, authorization, API-contract, Admin-bootstrap, and storage-constructor issues and added focused regression checks.
 
-The next phase is to turn the validated API flow into a Postman/Newman smoke suite, add secret scanning, then use the Grafana dashboard as evidence while measuring SQL Server behavior before and after tuning work.
+The repository now includes an automated 16-request Postman/Newman smoke suite, 11 xUnit tests, and CI artifact retention. The next evidence step is to retain the first green Newman and Trivy workflow runs; the separate cloud step is to review cost and a Terraform plan before provisioning Azure resources.
 
 ## What I Have Proven So Far
 
@@ -44,6 +46,10 @@ Dependabot creates dependency update PRs for GitHub Actions and NuGet packages
 CodeQL C# scanning is merged
 Grafana SQL Server dashboard connects to SakennyDB
 Dashboard uses a dedicated grafana_reader SQL login instead of sysadmin
+xUnit suite passes 11 tests with 0 failures
+Postman/Newman role smoke collection contains 16 requests
+Docker Compose defines SQL Server, Azurite, API, initialization, and Grafana
+Terraform formatting and validation pass
 ```
 
 ## Defects Discovered Through Testing
@@ -52,7 +58,8 @@ Dashboard uses a dedicated grafana_reader SQL login instead of sysadmin
 Missing authentication middleware in the ASP.NET request pipeline
 Services API cannot create a row because Icon is required but missing from the create DTO
 Type and Services mutation endpoints are not protected by Admin authorization
-Blob storage is initialized during dependency construction, affecting unrelated endpoints
+Anonymous callers could create an Admin account
+Blob storage was initialized during dependency construction, affecting unrelated endpoints
 Several routes use absolute paths, making the API less consistent
 Secrets and sensitive config should move out of appsettings.json
 EF Core warnings indicate model configuration cleanup is needed
@@ -72,6 +79,10 @@ Cleaned duplicate Azure.Storage.Blobs package reference after dependency conflic
 Added CodeQL C# SAST scanning
 Added Grafana SQL Server monitoring through Docker Compose
 Validated read-only Grafana datasource permissions
+Protected Admin registration and added explicit bootstrap configuration
+Moved blob container creation from the constructor to the upload operation
+Added xUnit, Newman/JUnit, Docker Compose, Trivy, and Terraform validation workflows
+Added a manual Azure deployment workflow using GitHub OIDC
 ```
 
 ## CI And Dependency Monitoring Evidence
@@ -126,8 +137,8 @@ Automation QA:
 API test design
 Positive and negative endpoint coverage
 Regression test planning
-Postman/Newman automation path
-Integration test roadmap
+Postman/Newman automation and JUnit evidence
+xUnit regression suite
 Evidence-based bug reporting
 ```
 
@@ -136,7 +147,7 @@ DevSecOps:
 ```text
 Secret management
 Role-based access validation
-SAST/dependency/container scanning roadmap
+SAST, dependency, secret, and container scanning gates
 CI/CD quality gates
 Dependabot dependency monitoring
 Security hardening backlog
@@ -148,8 +159,8 @@ Cloud Engineering:
 ```text
 Azure Blob/Azurite storage understanding
 Azure SQL deployment path
-Key Vault and managed identity roadmap
-Terraform infrastructure plan
+Key Vault and managed identity design
+Validated Terraform infrastructure baseline
 Monitoring and observability roadmap
 Local Grafana SQL Server dashboard
 ```
@@ -168,13 +179,10 @@ Measured before/after optimization plan
 ## Next Measurable Outcomes
 
 ```text
-Add Postman collection and Newman local run
-Add Newman CI run after the collection is stable
-Add Gitleaks secret scanning
-Add xUnit integration tests for auth and property flows
-Add Docker Compose for API dependencies
-Extend GitHub Actions CI with tests and security scans
+Retain Newman, xUnit, Trivy, CodeQL, and Gitleaks results as CI evidence
+Add database-backed integration tests for high-risk business flows
 Create SQL Server performance baseline report using Grafana evidence
-Deploy to Azure with Terraform
-Add monitoring dashboard and alerting notes
+Review Azure cost/security and a Terraform plan before apply
+Deploy a temporary Azure environment only after approval
+Add cloud monitoring, alerting, backup, and restore evidence
 ```

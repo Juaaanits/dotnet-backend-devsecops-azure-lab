@@ -9,13 +9,14 @@ This document records issues discovered during local validation. The intent is t
 | BUG-001 | High | Authentication | Fixed | JWT authorization required `app.UseAuthentication()` before `app.UseAuthorization()`. |
 | BUG-002 | High | Services API | Fixed | `POST /api/Services` failed because `Service.Icon` was required but `AddServiceDTO` did not accept `Icon`. |
 | BUG-003 | Medium | Authorization | Fixed | Type and Services mutation endpoints needed Admin-only authorization. |
-| BUG-004 | Medium | Storage | Open | `BlobService` connects to Azurite during service construction, affecting unrelated requests. |
+| BUG-004 | Medium | Storage | Fixed | `BlobService` no longer connects to Azurite during service construction. |
 | BUG-005 | Medium | API Design | Open | Some routes are absolute and inconsistent with controller route prefixes. |
 | BUG-006 | High | Secrets | Open | JWT key and external service settings are stored in appsettings. |
 | BUG-007 | Low | EF Model | Open | EF logs warnings about required relationships with global query filters. |
 | BUG-008 | Low | EF Model | Open | EF logs warnings about decimal precision on `PropertySnapshot`. |
 | BUG-009 | Low | Code Quality | Open | Build warnings show possible null dereferences in dashboard logic. |
 | BUG-010 | Medium | Dependency Config | Fixed | `origin/main` contained duplicate `Azure.Storage.Blobs` package references after Dependabot conflict resolution. |
+| BUG-011 | Critical | Authorization | Fixed | Anonymous callers could register an Admin account through `/AdminRegister`. |
 
 ## BUG-001: Missing Authentication Middleware
 
@@ -117,7 +118,7 @@ Risk:
 Unauthenticated users can mutate lookup/reference data.
 ```
 
-Proposed fix:
+Fix:
 
 ```text
 Require Admin role for create/update/delete endpoints on TypeController and ServicesController.
@@ -167,7 +168,7 @@ Startup and controller activation become coupled to external infrastructure.
 Proposed fix:
 
 ```text
-Move container creation to application startup health/setup or lazy initialization.
+Move container creation to the upload operation.
 Avoid external network calls in constructors.
 Only require blob storage when image endpoints or image upload flows are used.
 ```
@@ -178,6 +179,14 @@ Validation:
 /register works when Azurite is stopped.
 Image upload returns a clear storage error when Azurite is stopped.
 Image upload works when Azurite is running.
+```
+
+Status:
+
+```text
+Fixed. BlobService construction is side-effect free and container creation is awaited during upload.
+An xUnit regression test constructs BlobService with an unavailable development-storage endpoint.
+Full upload success/failure integration checks remain part of the end-to-end environment suite.
 ```
 
 ## BUG-005: Inconsistent Absolute Routes
@@ -383,15 +392,45 @@ Fixed on main. sakenny.csproj now keeps only Azure.Storage.Blobs 12.29.2.
 CI passed after the cleanup.
 ```
 
+## BUG-011: Anonymous Admin Registration
+
+Observed behavior:
+
+```text
+POST /AdminRegister could create an Admin account without an authenticated Admin token.
+```
+
+Risk:
+
+```text
+Any caller could grant itself the highest application role.
+```
+
+Fix:
+
+```text
+Require the Admin role on /AdminRegister.
+Create the first Admin only through explicit BootstrapAdmin configuration at startup.
+Keep bootstrap secrets in ignored environment files locally and Key Vault in Azure.
+```
+
+Validation:
+
+```text
+Controller metadata regression test requires Admin.
+Anonymous registration is expected to return 401.
+The Compose and CI environments provide a dedicated test bootstrap Admin.
+```
+
 ## Execution Order
 
 Recommended implementation order:
 
 ```text
-1. BUG-004: Remove BlobService constructor side effect.
-2. BUG-006: Move secrets out of appsettings.
-3. BUG-005: Standardize route design.
-4. BUG-007/008/009: Clean EF and nullable warnings with tests.
-5. Add regression tests for BUG-001, BUG-002, and BUG-003.
-6. Add Postman/Newman smoke tests for the validated API path.
+1. BUG-006: Remove remaining sensitive placeholders from tracked runtime configuration.
+2. BUG-005: Standardize route design with a compatibility plan.
+3. BUG-007/008/009: Clean EF and nullable warnings with tests.
+4. Expand regression coverage beyond authorization metadata.
+5. Run and retain the Newman and Trivy GitHub artifacts.
+6. Review Azure Terraform plan before any cost-bearing apply.
 ```
